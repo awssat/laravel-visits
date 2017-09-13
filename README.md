@@ -16,7 +16,7 @@ Laravel Redis visits counter for Eloquent models
 Via Composer
 
 ``` bash
-$ composer require phpfalcon/Bareq
+$ composer require phpfalcon/bareq
 ```
 
 ## Usage
