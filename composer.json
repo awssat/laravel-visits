@@ -1,5 +1,5 @@
 {
-    "name": "phpfalcon/Bareq",
+    "name": "phpfalcon/bareq",
     "type": "library",
     "description": "Laravel Redis visits counter for Eloquent models",
     "keywords": [
