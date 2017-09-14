@@ -4,6 +4,6 @@ if (! function_exists('visits'))
 {
     function visits($subject)
     {
-        return new \phpfalcon\Bareq\Visits($subject);
+        return new \if4lcon\Bareq\Visits($subject);
     }
 }
