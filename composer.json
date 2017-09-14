@@ -5,7 +5,7 @@
     "keywords": [
         "Laravel", "Visits", "Counter", "Package",  "Redis",  "Cache",  "Php", "Bareq"
     ],
-    "homepage": "https://github.com/phpfalcon/Bareq",
+    "homepage": "https://github.com/if4lcon/Bareq",
     "license": "MIT",
     "authors": [
         {
@@ -23,7 +23,7 @@
     },
     "autoload": {
         "psr-4": {
-            "phpfalcon\\Bareq\\": "src"
+            "if4lcon\\Bareq\\": "src"
         },
         "files": [
             "src/helpers.php"
@@ -40,10 +40,10 @@
         },
         "laravel": {
             "providers": [
-                "phpfalcon\\Bareq\\BareqServiceProvider"
+                "if4lcon\\Bareq\\BareqServiceProvider"
             ],
             "aliases": {
-                "Visits": "phpfalcon\\Bareq\\Visits"
+                "Visits": "if4lcon\\Bareq\\Visits"
             }
         }
     },
