@@ -1,6 +1,6 @@
 <?php
 
-namespace phpfalcon\Bareq;
+namespace if4lcon\Bareq;
 
 use Illuminate\Database\Eloquent\Model;
 

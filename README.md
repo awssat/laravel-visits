@@ -16,7 +16,7 @@ Laravel Redis visits counter for Eloquent models
 Via Composer
 
 ``` bash
-$ composer require phpfalcon/Bareq
+$ composer require if4lcon/bareq
 ```
 
 ## Usage
@@ -168,17 +168,17 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) and [CODE_OF_CONDUCT](CODE_OF_CONDUCT
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
-[ico-version]: https://img.shields.io/packagist/v/phpfalcon/Bareq.svg?style=flat-square
+[ico-version]: https://img.shields.io/packagist/v/if4lcon/Bareq.svg?style=flat-square
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
-[ico-travis]: https://img.shields.io/travis/phpfalcon/Bareq/master.svg?style=flat-square
-[ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/phpfalcon/Bareq.svg?style=flat-square
-[ico-code-quality]: https://img.shields.io/scrutinizer/g/phpfalcon/Bareq.svg?style=flat-square
-[ico-downloads]: https://img.shields.io/packagist/dt/phpfalcon/Bareq.svg?style=flat-square
+[ico-travis]: https://img.shields.io/travis/if4lcon/Bareq/master.svg?style=flat-square
+[ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/if4lcon/Bareq.svg?style=flat-square
+[ico-code-quality]: https://img.shields.io/scrutinizer/g/if4lcon/Bareq.svg?style=flat-square
+[ico-downloads]: https://img.shields.io/packagist/dt/if4lcon/Bareq.svg?style=flat-square
 
-[link-packagist]: https://packagist.org/packages/phpfalcon/Bareq
-[link-travis]: https://travis-ci.org/phpfalcon/Bareq
-[link-scrutinizer]: https://scrutinizer-ci.com/g/phpfalcon/Bareq/code-structure
-[link-code-quality]: https://scrutinizer-ci.com/g/phpfalcon/Bareq
-[link-downloads]: https://packagist.org/packages/phpfalcon/Bareq
-[link-author]: https://github.com/phpfalcon
+[link-packagist]: https://packagist.org/packages/if4lcon/Bareq
+[link-travis]: https://travis-ci.org/if4lcon/Bareq
+[link-scrutinizer]: https://scrutinizer-ci.com/g/if4lcon/Bareq/code-structure
+[link-code-quality]: https://scrutinizer-ci.com/g/if4lcon/Bareq
+[link-downloads]: https://packagist.org/packages/if4lcon/Bareq
+[link-author]: https://github.com/if4lcon
 [link-contributors]: ../../contributors
