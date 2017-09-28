@@ -162,8 +162,14 @@ class Visits
             if($periods) {
                 foreach ($this->periods as $period => $days) {
                     $periodKey = $this->keys->period($period);
-                    Redis::zincrby($periodKey, $inc, $this->keys->id);
-                    Redis::expire($periodKey, $days * 24 * 60 * 60);
+
+                    if ( ! Redis::exists($periodKey)) {
+                        Redis::zincrby($periodKey, $inc, $this->keys->id);
+                        Redis::expire($periodKey, $days * 24 * 60 * 60);
+                    } else {
+                        Redis::zincrby($periodKey, $inc, $this->keys->id);
+                    }
+
                     Redis::incrby($periodKey . '_total', $inc);
                 }
             }

@@ -15,7 +15,7 @@ class BareqServiceProvider extends ServiceProvider
     {
         $this->publishes([
             __DIR__ . '/config/bareq.php' => config_path('bareq.php'),
-        ]);
+        ], 'config');
     }
 
     /**

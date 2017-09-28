@@ -66,6 +66,22 @@ class visitsTest extends TestCase
         return factory($class, $times)->make($attributes);
     }
 
+    /** @test */
+    public function dont_reset_time_expiration_every_increment()
+    {
+        $post = $this->create('App\Post');
+
+        visits($post)->forceIncrement();
+
+        $timenow = visits($post)->timeLeft('day')->diffInSeconds();
+
+        visits($post)->forceIncrement();
+
+        $timethen = visits($post)->timeLeft('day')->diffInSeconds();
+
+        $this->assertNotEquals($timenow, $timethen);
+    }
+
     /**
      * @test
      */

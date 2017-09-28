@@ -45,7 +45,13 @@ class Reset extends Visits
     public function visits()
     {
         if ($this->keys->id) {
-            $this->forceDecrement($this->count());
+            Redis::zrem($this->keys->visits, $this->keys->id);
+
+            foreach ($this->periods as $period) {
+                Redis::zrem($this->keys->period($period), $this->keys->id);
+            }
+
+            $this->ips();
         } else {
             Redis::del($this->keys->visits);
             Redis::del($this->keys->visits . '_total');
