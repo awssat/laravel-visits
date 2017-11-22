@@ -37,13 +37,22 @@
 
 namespace Tests\Feature;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Redis;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+use Spatie\Referer\Referer;
+use Spatie\Referer\CaptureReferer;
+use Spatie\Referer\RefererServiceProvider;
 
-class visitsTest extends TestCase
+
+class VisitsTest extends TestCase
 {
+    /** @var \Illuminate\Contracts\Session\Session */
+    protected $session;
+    /** @var \Spatie\Referer\Referer */
+    protected $referer;
 
     use RefreshDatabase;
 
@@ -51,9 +60,30 @@ class visitsTest extends TestCase
     {
         parent::setUp();
 
+        $this->app['router']->get('/')->middleware(CaptureReferer::class, function () {
+            return response(null, 200);
+        });
+        $this->session = $this->app['session.store'];
+        $this->referer = $this->app['referer'];
+
         visits('App\Post')
             ->reset('factory');
 
+        Redis::del('bareq:testing');
+
+    }
+
+    protected function getPackageProviders($app)
+    {
+        return [
+            RefererServiceProvider::class,
+        ];
+    }
+    protected function withConfig(array $config)
+    {
+        $this->app['config']->set($config);
+        $this->app->forgetInstance(Referer::class);
+        $this->referer = $this->app->make(Referer::class);
     }
 
     function create($class, $times = null, $attributes = [])
@@ -66,20 +96,72 @@ class visitsTest extends TestCase
         return factory($class, $times)->make($attributes);
     }
 
+
     /** @test */
-    public function dont_reset_time_expiration_every_increment()
+    public function element_should_expire_and_other_elements_not()
     {
-        $post = $this->create('App\Post');
+        $post1 = $this->create('App\Post');
 
-        visits($post)->forceIncrement();
+        visits($post1)->increment(10);
+        visits($post1)->expireAt('day', Carbon::now()->timestamp);
+        visits($post1)->forceIncrement(1);
+        $this->assertEquals([1, 11, 11, 11, 11], [
+            visits($post1)->period('day')->count(),
+            visits($post1)->count(),
+            visits($post1)->period('week')->count(),
+            visits($post1)->period('month')->count(),
+            visits($post1)->period('year')->count()
+        ]);
+    }
 
-        $timenow = visits($post)->timeLeft('day')->diffInSeconds();
 
-        visits($post)->forceIncrement();
+    /** @test */
+    public function referer_test()
+    {
+        $this->referer->put('google.com');
 
-        $timethen = visits($post)->timeLeft('day')->diffInSeconds();
+        $title = $this->create('App\Post');
 
-        $this->assertNotEquals($timenow, $timethen);
+        visits($title)->forceIncrement();
+
+        $this->referer->put('twitter.com');
+
+        visits($title)->forceIncrement(10);
+
+        $this->assertEquals(['twitter.com' => 10, 'google.com' => 1,], visits($title)->refs());
+    }
+
+    /** @test */
+    public function store_country_aswell()
+    {
+        $title = $this->create('App\Post');
+
+        visits($title)->increment(1, true, true, true, '88.17.102.155');
+
+        $this->assertEquals(1, visits($title)->country('es')->count());
+    }
+
+    /** @test */
+    public function get_countries()
+    {
+        $title = $this->create('App\Post');
+
+        $ips = [
+            '88.17.102.155',
+            '178.80.134.112',
+            '83.96.36.50',
+            '211.202.2.111',
+        ];
+
+        $x = 1;
+        foreach ($ips as $ip)
+        {
+            visits($title)->increment($x++, true, true, true, $ip);
+        }
+
+        visits($title)->increment(20, true, true, true, '178.80.134.112');
+
+        $this->assertEquals(['sa' => 22, 'kr' => 4, 'kw' => 3, 'es' => 1], visits($title)->countries(-1));
     }
 
     /**
@@ -100,8 +182,8 @@ class visitsTest extends TestCase
         visits($post1)->reset();
 
         $this->assertEquals(
-            [2, 3, 1],
-            visits('App\Post')->top()->pluck('id')->toArray()
+            [2, 3],
+            visits('App\Post')->top(5)->pluck('id')->toArray()
         );
 
     }
@@ -113,13 +195,13 @@ class visitsTest extends TestCase
 
         visits($post)->increment(10);
 
+        //dd
         $ips = [
             '125.0.0.2',
             '129.0.0.2',
             '124.0.0.2'
         ];
-
-        $key = config('bareq.redis_keys_prefix') . ":testing:recorded_ips:post_1:";
+        $key = config('bareq.redis_keys_prefix') . ":testing:recorded_ips:title_1:";
 
         foreach ($ips as $ip) {
             Redis::set( $key . $ip, true, 'EX', 15 * 60, 'NX');
@@ -139,9 +221,9 @@ class visitsTest extends TestCase
             return str_replace($key, '', $ip);
         });
 
-        $this->assertEquals(
-            $ips_in_redis->toArray(),
-            $ips
+        $this->assertArrayNotHasKey(
+            '127.0.0.1',
+            $ips_in_redis->toArray()
         );
 
         visits($post)->increment(10);
@@ -296,35 +378,13 @@ class visitsTest extends TestCase
 
         visits($post)->seconds(1)->increment();
 
-        sleep(visits($post)->timeLeft()->diffInSeconds());
+        sleep(visits($post)->timeLeft()->diffInSeconds() + 1);
 
         visits($post)->increment();
 
         $this->assertEquals(2, visits($post)->count());
     }
 
-
-    /**
-     * @test
-     */
-    public function periods_time_correct()
-    {
-
-
-        $post = $this->create('App\Post');
-
-        visits($post)->increment();
-
-        $day   = visits('App\Post')->timeLeft('day')->diffInDays();
-        $week  = visits('App\Post')->timeLeft('week')->diffInDays();
-        $month = visits('App\Post')->timeLeft('month')->diffInDays();
-        $year  = visits('App\Post')->timeLeft('year')->diffInDays();
-
-        $this->assertEquals(
-            [1, 7, 30, 365],
-            [$day, $week, $month, $year]
-        );
-    }
 
 
     /**

@@ -4,12 +4,15 @@ namespace if4lcon\Bareq;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Redis;
+use Spatie\Referer\Referer;
 
 class Visits
 {
     protected $ipSeconds;
     protected $subject;
     protected $fresh = false;
+    protected $country = null;
+    protected $referer = null;
     protected $periods;
     protected $keys;
 
@@ -52,6 +55,21 @@ class Visits
         return $this;
     }
 
+
+    public function country($country)
+    {
+        $this->country = $country;
+
+        return $this;
+    }
+
+
+    public function referer($referer)
+    {
+        $this->referer = $referer;
+
+        return $this;
+    }
     /**
      * Change period
      *
@@ -96,6 +114,21 @@ class Visits
         return ($visitsIds === $cachedIds && ! $this->fresh) ? $cachedList : $this->freshList($cacheKey, $visitsIds);
     }
 
+
+    public function countries($limit = -1, $isLow = false)
+    {
+        $range = $isLow ? 'zrange' : 'zrevrange';
+
+        return Redis::$range($this->keys->visits . "_countries:{$this->keys->id}", 0, $limit, 'WITHSCORES');
+    }
+
+    public function refs($limit = -1, $isLow = false)
+    {
+        $range = $isLow ? 'zrange' : 'zrevrange';
+
+        return Redis::$range($this->keys->visits . "_referers:{$this->keys->id}", 0, $limit, 'WITHSCORES');
+    }
+
     /**
      * Fetch lowest subjects.
      *
@@ -126,6 +159,13 @@ class Visits
      */
     public function count()
     {
+        if($this->country) {
+            return Redis::zscore($this->keys->visits . "_countries:{$this->keys->id}", $this->country);
+        }
+        else if($this->referer) {
+            return Redis::zscore($this->keys->visits . "_referers:{$this->keys->id}", $this->referer);
+        }
+
         return intval(
             ( ! $this->keys->instanceOfModel) ?
                 Redis::get($this->keys->visits . '_total') :
@@ -151,25 +191,35 @@ class Visits
      * @param int $inc
      * @param bool $force
      * @param bool $periods
+     * @param bool $country
+     * @param bool $refer
      */
-    public function increment($inc = 1, $force = false, $periods = true)
+    public function increment($inc = 1, $force = false, $periods = true, $country = true, $ip = null, $refer = true)
     {
         if ( $force || ! $this->recordedIp()) {
+            $this->subject->increment('visits');
             Redis::zincrby($this->keys->visits, $inc, $this->keys->id);
             Redis::incrby($this->keys->visits . '_total', $inc);
 
+
+            if($country) {
+                $zz = $this->getCountry($ip);
+                Redis::zincrby($this->keys->visits . "_countries:{$this->keys->id}", $inc, $zz);
+            }
+
+
+            $referer = app(Referer::class)->get();
+
+            if($refer && !empty($referer)) {
+                Redis::zincrby($this->keys->visits . "_referers:{$this->keys->id}", $inc, $referer);
+            }
 
             if($periods) {
                 foreach ($this->periods as $period => $days) {
                     $periodKey = $this->keys->period($period);
 
-                    if ( ! Redis::exists($periodKey)) {
-                        Redis::zincrby($periodKey, $inc, $this->keys->id);
-                        Redis::expire($periodKey, $days * 24 * 60 * 60);
-                    } else {
-                        Redis::zincrby($periodKey, $inc, $this->keys->id);
-                    }
-
+                    $this->checkExpiration($periodKey, $days);
+                    Redis::zincrby($periodKey, $inc, $this->keys->id);
                     Redis::incrby($periodKey . '_total', $inc);
                 }
             }
@@ -251,5 +301,62 @@ class Visits
     protected function cachedList($limit, $cacheKey)
     {
         return collect(array_map('unserialize', Redis::lrange($cacheKey, 0, $limit - 1)));
+    }
+
+
+    /**
+     *  Gets visitor country code
+     * @return mixed|string
+     */
+    public function getCountry($ip = null)
+    {
+
+        if(session('country_code')){
+            return session('country_code');
+        }
+
+        $country_code = 'zz';
+
+        if(isset($_SERVER["HTTP_CF_IPCOUNTRY"])){
+            $country_code = strtolower($_SERVER["HTTP_CF_IPCOUNTRY"]);
+        }
+
+        if($country_code === 'zz' && app()->has('geoip')) {
+
+            $geo_info = geoip()->getLocation($ip);
+
+            if (!empty($geo_info) && isset($geo_info['iso_code'])) {
+                $country_code = strtolower($geo_info['iso_code']);
+            }
+
+        }
+
+        session(['country_code', $country_code]);
+        return $country_code;
+    }
+
+    private function checkExpiration($periodKey, $days)
+    {
+        $expireAt = Redis::get($periodKey . '_expireDates:' . $this->keys->id);
+
+        if ($expireAt && $expireAt <= Carbon::now()->timestamp) {
+            Redis::zrem($periodKey, $this->keys->id);
+            $expireAt = false;
+        }
+
+        if(!$expireAt) {
+            Redis::set($periodKey . '_expireDates:' . $this->keys->id, Carbon::now()->addDays($days)->timestamp);
+        }
+    }
+
+    /**
+     * @param $period
+     * @param int $time
+     * @return bool
+     */
+    public function expireAt($period, $time)
+    {
+        $periodKey = $this->keys->period($period);
+        return Redis::set($periodKey . '_expireDates:' . $this->keys->id, $time);
     }
 }

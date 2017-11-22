@@ -37,6 +37,8 @@ class Reset extends Visits
         $this->periods();
         $this->ips();
         $this->lists();
+        $this->allcountries();
+        $this->allrefs();
     }
 
     /**
@@ -46,8 +48,10 @@ class Reset extends Visits
     {
         if ($this->keys->id) {
             Redis::zrem($this->keys->visits, $this->keys->id);
+            Redis::del($this->keys->visits . "_countries:{$this->keys->id}");
+            Redis::del($this->keys->visits . "_referers:{$this->keys->id}");
 
-            foreach ($this->periods as $period) {
+            foreach ($this->periods as $period => $days) {
                 Redis::zrem($this->keys->period($period), $this->keys->id);
             }
 
@@ -57,6 +61,25 @@ class Reset extends Visits
             Redis::del($this->keys->visits . '_total');
         }
 
+    }
+
+    public function allrefs()
+    {
+        $cc = Redis::keys($this->keys->visits . '_referers:*');
+
+        if (count($cc)) {
+            Redis::del($cc);
+        }
+    }
+
+
+    public function allcountries()
+    {
+        $cc = Redis::keys($this->keys->visits . '_countries:*');
+
+        if (count($cc)) {
+            Redis::del($cc);
+        }
     }
 
     /**
