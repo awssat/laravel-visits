@@ -19,6 +19,14 @@ Via Composer
 $ composer require if4lcon/bareq
 ```
 
+The package will automatically register itself in Laravel 5.5. In Laravel 5.4. you'll manually need to register the `if4lcon\Bareq\BareqServiceProvider::class` service provider in `config/app.php`.
+
+You can publish the config file with:
+
+```
+php artisan vendor:publish --provider="if4lcon\Bareq\BareqServiceProvider"
+```
+
 ## Usage
 
 ## Increments :
