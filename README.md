@@ -1,7 +1,7 @@
 # Bareq
 
 [![Latest Version on Packagist][link-packagist]
-[![Software License][ico-license]](LICENSE.md)
+[![Software License][ico-license](LICENSE.md)
 [![Build Status][ico-travis]][link-travis]
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
