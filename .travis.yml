@@ -9,3 +9,5 @@ before_script:
   - composer dump-autoload
 script:
   - vendor/bin/phpunit
+services:
+  - redis-server
