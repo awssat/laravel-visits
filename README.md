@@ -3,7 +3,6 @@
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
 [![Build Status][ico-travis]][link-travis]
-[![Coverage Status][ico-scrutinizer]][link-scrutinizer]
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
 
@@ -170,9 +169,6 @@ and you can access it by calling :
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
-## Testing
-
-Copy `` visitsTest.php `` to your Laravel tests folder and make sure to change the tested model with yours
 
 ## Contributing
 
@@ -189,7 +185,7 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 
 [ico-version]: https://img.shields.io/packagist/v/if4lcon/Bareq.svg?style=flat-square
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
-[ico-travis]: https://img.shields.io/travis/if4lcon/Bareq/master.svg?style=flat-square
+[ico-travis]: https://travis-ci.org/awssat/Bareq.svg?branch=master
 [ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/if4lcon/Bareq.svg?style=flat-square
 [ico-code-quality]: https://img.shields.io/scrutinizer/g/if4lcon/Bareq.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/if4lcon/Bareq.svg?style=flat-square
