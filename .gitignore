@@ -5,3 +5,4 @@ composer.lock
 /.idea
 .env
 .DS_Store
+/.vscode
