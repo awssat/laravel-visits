@@ -105,6 +105,17 @@ visits('App\Post')->count()
 visits('App\Post')->period('day')->count()
 ```
 
+## Countries :
+``` php
+visits($post)->countries()
+```
+
+## Referer :
+``` php
+visits($post)->refs()
+```
+
+
 ## Resets :
 
 #### Subject visits
