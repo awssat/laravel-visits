@@ -1,6 +1,6 @@
 # Bareq
 
-[![Latest Version on Packagist][ico-version]][link-packagist]
+[![Latest Version on Packagist][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
 [![Build Status][ico-travis]][link-travis]
 [![Quality Score][ico-code-quality]][link-code-quality]
@@ -186,8 +186,7 @@ The MIT License (MIT). Please see [License File](LICENSE.md) for more informatio
 [ico-version]: https://img.shields.io/packagist/v/if4lcon/Bareq.svg?style=flat-square
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
 [ico-travis]: https://travis-ci.org/awssat/Bareq.svg?branch=master
-[ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/if4lcon/Bareq.svg?style=flat-square
-[ico-code-quality]: https://img.shields.io/scrutinizer/g/if4lcon/Bareq.svg?style=flat-square
+[ico-code-quality]: https://scrutinizer-ci.com/g/if4lcon/Bareq/badges/quality-score.png?b=master
 [ico-downloads]: https://img.shields.io/packagist/dt/if4lcon/Bareq.svg?style=flat-square
 
 [link-packagist]: https://packagist.org/packages/if4lcon/Bareq
