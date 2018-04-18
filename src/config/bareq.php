@@ -10,12 +10,12 @@ return [
     | Set time in days for each periods counter , you can leave it blank if you like
     |
     */
-    'periods'      => [
+    'periods' => [
 
-        'day'   => 1,
-        'week'  => 7,
-        'month' => 30,
-        'year'  => 365,
+        'day',
+        'week',
+        'month',
+        'year',
     ],
 
     /*

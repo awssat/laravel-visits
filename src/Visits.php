@@ -3,6 +3,7 @@
 namespace if4lcon\Bareq;
 
 use Carbon\Carbon;
+use function Composer\Autoload\includeFile;
 use Illuminate\Support\Facades\Redis;
 use Spatie\Referer\Referer;
 
@@ -23,12 +24,14 @@ class Visits
      */
     public function __construct($subject = null, Keys $keys = null)
     {
-        $config          = config('bareq');
-        $this->periods   = $config['periods'];
+        $config = config('bareq');
+        $this->periods = $config['periods'];
         $this->ipSeconds = $config['remember_ip'];
-        $this->fresh     = $config['always_fresh'];
-        $this->subject   = $subject;
-        $this->keys      = ($keys) ? $keys : new Keys($subject);
+        $this->fresh = $config['always_fresh'];
+        $this->subject = $subject;
+        $this->keys = ($keys) ? $keys : new Keys($subject);
+
+        $this->periodsSync();
     }
 
     /**
@@ -70,6 +73,7 @@ class Visits
 
         return $this;
     }
+
     /**
      * Change period
      *
@@ -83,6 +87,48 @@ class Visits
         }
 
         return $this;
+    }
+
+    protected function periodsSync()
+    {
+        foreach ($this->periods as $period) {
+            $periodKey = $this->keys->period($period);
+
+            if ($this->noExpiration($periodKey)) {
+                $expireInSeconds = $this->newExpiration($period);
+                Redis::incrby($periodKey . '_total', 0);
+                Redis::zincrby($periodKey, 0, 0);
+                Redis::expire($periodKey, $expireInSeconds);
+                Redis::expire($periodKey . '_total', $expireInSeconds);
+            }
+        }
+    }
+
+    protected function noExpiration($periodKey)
+    {
+        return Redis::ttl($periodKey) == -1 || !Redis::exists($periodKey);
+    }
+
+    protected function newExpiration($period)
+    {
+        $expireInSeconds = 0;
+
+        switch ($period) {
+            case 'day':
+                $expireInSeconds = Carbon::now()->endOfDay()->timestamp - Carbon::now()->timestamp;
+                break;
+            case 'week':
+                $expireInSeconds = Carbon::now()->endOfWeek()->timestamp - Carbon::now()->timestamp;
+                break;
+            case 'month':
+                $expireInSeconds = Carbon::now()->endOfMonth()->timestamp - Carbon::now()->timestamp;
+                break;
+            case 'year':
+                $expireInSeconds = Carbon::now()->endOfYear()->timestamp - Carbon::now()->timestamp;
+                break;
+        }
+
+        return $expireInSeconds + 1;
     }
 
     /**
@@ -106,12 +152,12 @@ class Visits
      */
     public function top($limit = 5, $isLow = false)
     {
-        $visitsIds  = $this->getVisits($limit, $this->keys->visits, $isLow);
-        $cacheKey   = $this->keys->cache($limit, $isLow);
+        $visitsIds = $this->getVisits($limit, $this->keys->visits, $isLow);
+        $cacheKey = $this->keys->cache($limit, $isLow);
         $cachedList = $this->cachedList($limit, $cacheKey);
-        $cachedIds  = $cachedList->pluck('id')->toArray();
+        $cachedIds = $cachedList->pluck('id')->toArray();
 
-        return ($visitsIds === $cachedIds && ! $this->fresh) ? $cachedList : $this->freshList($cacheKey, $visitsIds);
+        return ($visitsIds === $cachedIds && !$this->fresh) ? $cachedList : $this->freshList($cacheKey, $visitsIds);
     }
 
 
@@ -148,7 +194,7 @@ class Visits
      */
     public function recordedIp()
     {
-        return ! Redis::set($this->keys->ip(request()->ip()), true, 'EX', $this->ipSeconds, 'NX');
+        return !Redis::set($this->keys->ip(request()->ip()), true, 'EX', $this->ipSeconds, 'NX');
     }
 
     /**
@@ -159,15 +205,14 @@ class Visits
      */
     public function count()
     {
-        if($this->country) {
+        if ($this->country) {
             return Redis::zscore($this->keys->visits . "_countries:{$this->keys->id}", $this->country);
-        }
-        else if($this->referer) {
+        } else if ($this->referer) {
             return Redis::zscore($this->keys->visits . "_referers:{$this->keys->id}", $this->referer);
         }
 
         return intval(
-            ( ! $this->keys->instanceOfModel) ?
+            (!$this->keys->instanceOfModel) ?
                 Redis::get($this->keys->visits . '_total') :
                 Redis::zscore($this->keys->visits, $this->keys->id)
         );
@@ -181,9 +226,10 @@ class Visits
     public function timeLeft($period = false)
     {
         return Carbon::now()->addSeconds(Redis::ttl(
-                    $period ? $this->keys->period($period) : $this->keys->ip( request()->ip() )
-                ));
+            $period ? $this->keys->period($period) : $this->keys->ip(request()->ip())
+        ));
     }
+
 
     /**
      * Increment a new/old subject to the cache cache.
@@ -196,13 +242,12 @@ class Visits
      */
     public function increment($inc = 1, $force = false, $periods = true, $country = true, $ip = null, $refer = true)
     {
-        if ( $force || ! $this->recordedIp()) {
-            $this->subject->increment('visits');
+        if ($force || !$this->recordedIp()) {
             Redis::zincrby($this->keys->visits, $inc, $this->keys->id);
             Redis::incrby($this->keys->visits . '_total', $inc);
 
 
-            if($country) {
+            if ($country) {
                 $zz = $this->getCountry($ip);
                 Redis::zincrby($this->keys->visits . "_countries:{$this->keys->id}", $inc, $zz);
             }
@@ -210,15 +255,14 @@ class Visits
 
             $referer = app(Referer::class)->get();
 
-            if($refer && !empty($referer)) {
+            if ($refer && !empty($referer)) {
                 Redis::zincrby($this->keys->visits . "_referers:{$this->keys->id}", $inc, $referer);
             }
 
-            if($periods) {
-                foreach ($this->periods as $period => $days) {
+            if ($periods) {
+                foreach ($this->periods as $period) {
                     $periodKey = $this->keys->period($period);
 
-                    $this->checkExpiration($periodKey, $days);
                     Redis::zincrby($periodKey, $inc, $this->keys->id);
                     Redis::incrby($periodKey . '_total', $inc);
                 }
@@ -280,9 +324,8 @@ class Visits
             Redis::del($cacheKey);
 
             return ($this->subject)::whereIn($this->keys->primary, $visitsIds)
-                //->orderByRaw(DB::raw("FIELD({$this->keys->primary}, " . implode(',', $visitsIds) . ")"))
                 ->get()
-                ->sortBy(function($subject) use($visitsIds) {
+                ->sortBy(function ($subject) use ($visitsIds) {
                     return array_search($subject->{$this->keys->primary}, $visitsIds);
                 })
                 ->each(function ($subject) use ($cacheKey) {
@@ -310,18 +353,17 @@ class Visits
      */
     public function getCountry($ip = null)
     {
-
-        if(session('country_code')){
+        if (session('country_code')) {
             return session('country_code');
         }
 
         $country_code = 'zz';
 
-        if(isset($_SERVER["HTTP_CF_IPCOUNTRY"])){
+        if (isset($_SERVER["HTTP_CF_IPCOUNTRY"])) {
             $country_code = strtolower($_SERVER["HTTP_CF_IPCOUNTRY"]);
         }
 
-        if($country_code === 'zz' && app()->has('geoip')) {
+        if ($country_code === 'zz' && app()->has('geoip')) {
 
             $geo_info = geoip()->getLocation($ip);
 
@@ -335,20 +377,6 @@ class Visits
         return $country_code;
     }
 
-    private function checkExpiration($periodKey, $days)
-    {
-        $expireAt = Redis::get($periodKey . '_expireDates:' . $this->keys->id);
-
-        if ($expireAt && $expireAt <= Carbon::now()->timestamp) {
-            Redis::zrem($periodKey, $this->keys->id);
-            $expireAt = false;
-        }
-
-        if(!$expireAt) {
-            Redis::set($periodKey . '_expireDates:' . $this->keys->id, Carbon::now()->addDays($days)->timestamp);
-        }
-    }
-
     /**
      * @param $period
      * @param int $time
@@ -357,6 +385,6 @@ class Visits
     public function expireAt($period, $time)
     {
         $periodKey = $this->keys->period($period);
-        return Redis::set($periodKey . '_expireDates:' . $this->keys->id, $time);
+        return Redis::expire($periodKey, $time);
     }
 }

@@ -20,16 +20,16 @@ class Keys
      */
     public function __construct($subject)
     {
-        $this->modelName =  strtolower(str_plural(class_basename(is_string($subject) ? $subject : get_class($subject))));
-        $this->prefix    = config('bareq.redis_keys_prefix');
-        $this->testing   = app()->environment('testing') ? 'testing:' : '';
-        $this->primary   = (new $subject)->getKeyName();
-        $this->visits    = $this->visits($subject);
+        $this->modelName = strtolower(str_plural(class_basename(is_string($subject) ? $subject : get_class($subject))));
+        $this->prefix = config('bareq.redis_keys_prefix');
+        $this->testing = app()->environment('testing') ? 'testing:' : '';
+        $this->primary = (new $subject)->getKeyName();
+        $this->visits = $this->visits($subject);
 
         if ($subject instanceof Model) {
             $this->instanceOfModel = true;
             $this->modelName = strtolower(str_singular(class_basename(get_class($subject))));
-            $this->id        = $subject->{$subject->getKeyName()};
+            $this->id = $subject->{$subject->getKeyName()};
         }
     }
 
@@ -41,7 +41,7 @@ class Keys
      */
     public function visits($key)
     {
-        return "{$this->prefix}:$this->testing"  .
+        return "{$this->prefix}:$this->testing" .
             strtolower(str_plural(class_basename(is_string($key) ? $key : get_class($key)))) .
             '_visits';
     }
@@ -64,7 +64,7 @@ class Keys
     public function cache($limit = '*', $isLow = false)
     {
         $key = "{$this->prefix}:$this->testing" . "lists";
-        if($limit == '*') {
+        if ($limit == '*') {
             return "{$key}:*";
         }
         return "{$key}:" . ($isLow ? "low" : "top") . "{$limit}_{$this->modelName}";
@@ -76,6 +76,6 @@ class Keys
      */
     public function period($period)
     {
-        return  "{$this->visits}_{$period}";
+        return "{$this->visits}_{$period}";
     }
 }
