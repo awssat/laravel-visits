@@ -14,7 +14,7 @@ class BareqServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__ . '/config/bareq.php' => config_path('bareq.php'),
+            __DIR__ . '/config/visits.php' => config_path('visits.php'),
         ], 'config');
     }
 
@@ -26,7 +26,7 @@ class BareqServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/config/bareq.php', 'bareq'
+            __DIR__.'/config/visits.php', 'bareq'
         );
     }
 }

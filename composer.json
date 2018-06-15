@@ -1,11 +1,11 @@
 {
-    "name": "f4lcon/bareq",
+    "name": "awssat/laravel-visits",
     "type": "library",
     "description": "Laravel Redis visits counter for Eloquent models",
     "keywords": [
         "Laravel", "Visits", "Counter", "Package",  "Redis",  "Cache",  "Php", "Bareq"
     ],
-    "homepage": "https://github.com/if4lcon/Bareq",
+    "homepage": "https://github.com/awssat/laravel-visits",
     "license": "MIT",
     "authors": [
         {
