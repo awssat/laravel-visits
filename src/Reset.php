@@ -15,7 +15,7 @@ class Reset extends Visits
      * @param $method
      * @param $args
      */
-    public function __construct(Visits $parent,$method, $args)
+    public function __construct(Visits $parent, $method, $args)
     {
         parent::__construct($parent->subject);
         $this->keys = $parent->keys;
