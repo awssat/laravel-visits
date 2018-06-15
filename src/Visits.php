@@ -188,7 +188,7 @@ class Visits
      *
      * @param int $limit
      * @param bool $isLow
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection|array
      */
     public function top($limit = 5, $isLow = false)
     {
@@ -233,7 +233,7 @@ class Visits
      * Fetch lowest subjects.
      *
      * @param int $limit
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection|array
      */
     public function low($limit = 5)
     {
@@ -393,7 +393,7 @@ class Visits
     /**
      * @param $limit
      * @param $cacheKey
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection|array
      */
     protected function cachedList($limit, $cacheKey)
     {
