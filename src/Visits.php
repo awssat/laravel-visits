@@ -188,7 +188,7 @@ class Visits
      *
      * @param int $limit
      * @param bool $isLow
-     * @return array
+     * @return \Illuminate\Support\Collection
      */
     public function top($limit = 5, $isLow = false)
     {
@@ -233,7 +233,7 @@ class Visits
      * Fetch lowest subjects.
      *
      * @param int $limit
-     * @return array
+     * @return \Illuminate\Support\Collection
      */
     public function low($limit = 5)
     {
