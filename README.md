@@ -14,7 +14,7 @@ Laravel Redis visits counter for Eloquent models
 Via Composer
 
 ``` bash
-$ composer require if4lcon/bareq
+$ composer require awssat/laravel-visits
 ```
 
 The package will automatically register itself in Laravel 5.5 and above. In Laravel 5.4. you'll manually need to register the `if4lcon\Bareq\BareqServiceProvider::class` service provider in `config/app.php`.
@@ -182,16 +182,16 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) and [CODE_OF_CONDUCT](CODE_OF_CONDUCT
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
-[ico-version]: https://img.shields.io/packagist/v/if4lcon/Bareq.svg?style=flat-square
+[ico-version]: https://img.shields.io/packagist/v/awssat/laravel-visits.svg?style=flat-square
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
-[ico-travis]: https://travis-ci.org/awssat/Bareq.svg?branch=master
-[ico-code-quality]: https://scrutinizer-ci.com/g/if4lcon/Bareq/badges/quality-score.png?b=master
-[ico-downloads]: https://img.shields.io/packagist/dt/if4lcon/Bareq.svg?style=flat-square
+[ico-travis]: https://travis-ci.org/awssat/laravel-visits.svg?branch=master
+[ico-code-quality]: https://scrutinizer-ci.com/g/awssat/laravel-visits/badges/quality-score.png?b=master
+[ico-downloads]: https://img.shields.io/packagist/dt/awssat/laravel-visits.svg?style=flat-square
 
-[link-packagist]: https://packagist.org/packages/if4lcon/Bareq
-[link-travis]: https://travis-ci.org/awssat/Bareq
-[link-scrutinizer]: https://scrutinizer-ci.com/g/if4lcon/Bareq/code-structure
-[link-code-quality]: https://scrutinizer-ci.com/g/if4lcon/Bareq
-[link-downloads]: https://packagist.org/packages/if4lcon/Bareq
+[link-packagist]: https://packagist.org/packages/awssat/laravel-visits
+[link-travis]: https://travis-ci.org/awssat/laravel-visits
+[link-scrutinizer]: https://scrutinizer-ci.com/g/awssat/laravel-visits/code-structure
+[link-code-quality]: https://scrutinizer-ci.com/g/awssat/laravel-visits
+[link-downloads]: https://packagist.org/packages/awssat/laravel-visits
 [link-author]: https://github.com/if4lcon
 [link-contributors]: ../../contributors
