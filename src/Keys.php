@@ -26,6 +26,7 @@ class Keys
         $this->testing = app()->environment('testing') ? 'testing:' : '';
         $this->primary = (new $subject)->getKeyName();
         $this->visits = $this->visits($subject);
+        $this->tag = $tag;
 
         if ($subject instanceof Model) {
             $this->instanceOfModel = true;

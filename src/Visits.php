@@ -9,12 +9,33 @@ use Spatie\Referer\Referer;
 
 class Visits
 {
+    /**
+     * @var mixed
+     */
     protected $ipSeconds;
+    /**
+     * @var null
+     */
     protected $subject;
+    /**
+     * @var bool|mixed
+     */
     protected $fresh = false;
+    /**
+     * @var null
+     */
     protected $country = null;
+    /**
+     * @var null
+     */
     protected $referer = null;
+    /**
+     * @var mixed
+     */
     protected $periods;
+    /**
+     * @var Keys
+     */
     protected $keys;
 
     /**
@@ -59,6 +80,10 @@ class Visits
     }
 
 
+    /**
+     * @param $country
+     * @return $this
+     */
     public function country($country)
     {
         $this->country = $country;
@@ -67,6 +92,10 @@ class Visits
     }
 
 
+    /**
+     * @param $referer
+     * @return $this
+     */
     public function referer($referer)
     {
         $this->referer = $referer;
@@ -89,6 +118,9 @@ class Visits
         return $this;
     }
 
+    /**
+     * Sync periods times
+     */
     protected function periodsSync()
     {
         foreach ($this->periods as $period) {
@@ -104,11 +136,19 @@ class Visits
         }
     }
 
+    /**
+     * @param $periodKey
+     * @return bool
+     */
     protected function noExpiration($periodKey)
     {
         return Redis::ttl($periodKey) == -1 || !Redis::exists($periodKey);
     }
 
+    /**
+     * @param $period
+     * @return int
+     */
     protected function newExpiration($period)
     {
         $expireInSeconds = 0;
@@ -161,6 +201,13 @@ class Visits
     }
 
 
+    /**
+     * Top/low countries
+     *
+     * @param int $limit
+     * @param bool $isLow
+     * @return mixed
+     */
     public function countries($limit = -1, $isLow = false)
     {
         $range = $isLow ? 'zrange' : 'zrevrange';
@@ -168,6 +215,13 @@ class Visits
         return Redis::$range($this->keys->visits . "_countries:{$this->keys->id}", 0, $limit, 'WITHSCORES');
     }
 
+    /**
+     * top/lows refs
+     *
+     * @param int $limit
+     * @param bool $isLow
+     * @return mixed
+     */
     public function refs($limit = -1, $isLow = false)
     {
         $range = $isLow ? 'zrange' : 'zrevrange';
@@ -339,7 +393,7 @@ class Visits
     /**
      * @param $limit
      * @param $cacheKey
-     * @return array
+     * @return \Illuminate\Support\Collection
      */
     protected function cachedList($limit, $cacheKey)
     {
