@@ -13,12 +13,13 @@ class Keys
     public $visits;
     public $primary = 'id';
     public $instanceOfModel = false;
+    public $tag;
 
     /**
      * Keys constructor.
      * @param $subject
      */
-    public function __construct($subject)
+    public function __construct($subject, $tag)
     {
         $this->modelName = strtolower(str_plural(class_basename(is_string($subject) ? $subject : get_class($subject))));
         $this->prefix = config('bareq.redis_keys_prefix');
@@ -42,8 +43,8 @@ class Keys
     public function visits($key)
     {
         return "{$this->prefix}:$this->testing" .
-            strtolower(str_plural(class_basename(is_string($key) ? $key : get_class($key)))) .
-            '_visits';
+            strtolower(str_plural(class_basename(is_string($key) ? $key : get_class($key))))
+            . "_{$this->tag}";
     }
 
     /**

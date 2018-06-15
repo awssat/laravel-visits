@@ -22,14 +22,14 @@ class Visits
      * @param $subject
      * @param Keys|null $keys
      */
-    public function __construct($subject = null, Keys $keys = null)
+    public function __construct($subject = null, $tag = 'visits')
     {
         $config = config('bareq');
         $this->periods = $config['periods'];
         $this->ipSeconds = $config['remember_ip'];
         $this->fresh = $config['always_fresh'];
         $this->subject = $subject;
-        $this->keys = ($keys) ? $keys : new Keys($subject);
+        $this->keys = new Keys($subject, $tag);
 
         $this->periodsSync();
     }
@@ -140,7 +140,7 @@ class Visits
      */
     public function reset($method = 'visits', $args = '')
     {
-        return new Reset($this, $this->keys, $method, $args);
+        return new Reset($this, $method, $args);
     }
 
     /**

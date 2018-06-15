@@ -24,6 +24,18 @@ class VisitsTest extends TestCase
     }
 
     /** @test */
+    public function multi_tags_visits()
+    {
+        $userA = Post::create()->fresh();
+
+        visits($userA)->increment();
+
+        visits($userA, 'clicks')->increment();
+
+        $this->assertEquals([1, 1,], [ visits($userA)->count(), visits($userA, 'clicks')->count() ]);
+    }
+
+    /** @test */
     public function periods_test()
     {
         //somone add something on end of the week

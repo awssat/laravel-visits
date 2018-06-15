@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Redis;
 
 class Reset extends Visits
 {
+    protected $visits;
 
     /**
      * Reset constructor.
@@ -14,9 +15,10 @@ class Reset extends Visits
      * @param $method
      * @param $args
      */
-    public function __construct(Visits $parent, Keys $keys, $method, $args)
+    public function __construct(Visits $parent,$method, $args)
     {
-        parent::__construct($parent->subject, $keys);
+        parent::__construct($parent->subject);
+        $this->keys = $parent->keys;
 
         if (method_exists($this, $method)) {
             if (empty($args)) {
