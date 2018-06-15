@@ -11,7 +11,7 @@
 
 
 ## Introduction
-Laravel Visits is a counter that can be attached to any model to track its visits.
+Laravel Visits is a counter that can be attached to any model to track its visits with useful features like IP-protection and lists caching
 
 
 ## Install
@@ -40,7 +40,7 @@ Where:
 - **$model**: is any Eloquent model from your project.
 - **{method}**: any method that is supported by this library, and they are documented below.
 
-Note:
+### Tags
 - You can track multiple kinds of visits to a single model using the tags as `visits($model, 'tag1')->increment()`
 
 
