@@ -1,31 +1,48 @@
 # Laravel Visits
 
+![aravel-visits](https://i.imgur.com/xHAzl0G.png)
+
+
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
 [![Build Status][ico-travis]][link-travis]
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
 
-Laravel Redis visits counter for Eloquent models 
+
+## Introduction
+Laravel Visits is a counter that can be attached to any model to track its visits.
 
 
 ## Install
 
 Via Composer
-
 ``` bash
-$ composer require awssat/laravel-visits
+composer require awssat/laravel-visits
 ```
 
-The package will automatically register itself in Laravel 5.5 and above. In Laravel 5.4. you'll manually need to register the `if4lcon\Bareq\BareqServiceProvider::class` service provider in `config/app.php`.
+### Before Laravel 5.5
+In Laravel 5.4. you'll manually need to register the `if4lcon\Bareq\BareqServiceProvider::class` service provider in `config/app.php`.
 
-You can publish the config file with:
-
+### Config
+To adjust the library, you can publish the config file to your project using:
 ```
 php artisan vendor:publish --provider="if4lcon\Bareq\BareqServiceProvider"
 ```
 
 ## Usage
+
+It's simple. Using `visits` helper as: 
+```
+visits($model)->{method}()
+```
+Where:
+- **$model**: is any Eloquent model from your project.
+- **{method}**: any method that is supported by this library, and they are documented below.
+
+Note:
+- You can track multiple kinds of visits to a single model using the tags as `visits($model, 'tag1')->increment()`
+
 
 ## Increments :
 
