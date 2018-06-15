@@ -1,4 +1,4 @@
-# Bareq
+# Laravel Visits
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
@@ -8,7 +8,6 @@
 
 Laravel Redis visits counter for Eloquent models 
 
-**Note:** Tested with Laravel 5.5 . 
 
 ## Install
 
@@ -18,7 +17,7 @@ Via Composer
 $ composer require if4lcon/bareq
 ```
 
-The package will automatically register itself in Laravel 5.5. In Laravel 5.4. you'll manually need to register the `if4lcon\Bareq\BareqServiceProvider::class` service provider in `config/app.php`.
+The package will automatically register itself in Laravel 5.5 and above. In Laravel 5.4. you'll manually need to register the `if4lcon\Bareq\BareqServiceProvider::class` service provider in `config/app.php`.
 
 You can publish the config file with:
 
