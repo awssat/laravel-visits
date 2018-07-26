@@ -14,17 +14,49 @@
 Laravel Visits is a counter that can be attached to any model to track its visits with useful features like IP-protection and lists caching
 
 
+## Table of Contents
+  * [Features](#features)
+  * [Install](#install)
+  * [Usage](#usage)
+  * [Increments and Decrements](#increments-and-decrements)
+  * [An item visits](#an-item-visits)
+  * [A model class visits](#a-model-class-visits)
+  * [Countries of visitors](#countries-of-visitors)
+  * [Referers of visitors](#referers-of-visitors)
+  * [Top or Lowest list per model type](#top-or-lowest-list-per-model-type)
+  * [Reset and clear values](#reset-and-clear-values)
+  * [Integration with Eloquent](#integration-with-eloquent)
+  * [Change log](#change-log)
+  * [Contributing](#contributing)
+  * [Credits](#credits)
+  * [License](#license)
+
+
+
+## Features
+- A model item can has many type of recorded visits (using tags).
+- It's not limitd to one type of Model (like some packages that allow only User model).
+- Record per visitors and not by vistis using IP detecting, so even with refresh visit won't duplicate (can be changed from config). 
+- Get Top/Lowest visits per a model.
+- Get most visited countries ...
+- Get visits per a period of time like a month of a year of an item or model.
+
+
+
 ## Install
 
 Via Composer
 ``` bash
 composer require awssat/laravel-visits
 ```
+#### Requirement
+- This package rely on heavly on Redis. To use it, make sure that Redis is configured and ready. (see [Laravel Redis Configuration](https://laravel.com/docs/5.6/redis#configuration))
 
-### Before Laravel 5.5
+
+#### Before Laravel 5.5
 In Laravel 5.4. you'll manually need to register the `if4lcon\Bareq\BareqServiceProvider::class` service provider in `config/app.php`.
 
-### Config
+#### Config
 To adjust the library, you can publish the config file to your project using:
 ```
 php artisan vendor:publish --provider="if4lcon\Bareq\BareqServiceProvider"
@@ -40,130 +72,140 @@ Where:
 - **$model**: is any Eloquent model from your project.
 - **{method}**: any method that is supported by this library, and they are documented below.
 
-### Tags
+#### Tags
 - You can track multiple kinds of visits to a single model using the tags as `visits($model, 'tag1')->increment()`
 
 
-## Increments :
+## Increments and Decrements
 
-#### Normal increment
+#### Increment
+##### One
 ``` php
 visits($post)->increment();
 ```
-
-#### Increment number of times
+##### More than one 
 ``` php
 visits($post)->increment(10);
 ```
 
-#### Set IP expiration time in seconds
-``` php
-visits($post)->seconds(30)->increment()
-```
-
-#### Decrement 
+#### Decrement
+##### One
 ``` php
 visits($post)->decrement();
 ```
-
-#### Decrement number of times
+##### More than one 
 ``` php
 visits($post)->decrement(10);
 ```
 
-#### Force increment / decrement 
+#### Only increment/decrement once during x seconds (based on visitor's IP)
+``` php
+visits($post)->seconds(30)->increment()
+```
+- Note: this will override default config setting (once each 15 minutes per IP).
+
+
+#### Force increment/decrement
 ``` php
 visits($post)->forceIncrement();
 visits($post)->forceDecrement();
 ```
-## Top/Low list :
+- This will ignore IP limitation and increment/decrement every visit.
 
-#### Top 10
-``` php
-visits('App\Post')->top(10)
-```
 
-#### Lowest 10
-``` php
-visits('App\Post')->low(10)
-```
 
-#### Get fresh list
-``` php
-visits('App\Post')->fresh()->top(10)
-```
+## An item visits
 
-#### Get top/low of periods
-``` php
-visits('App\Post')->period('month')->top(10)
-```
-
-## Counts :
-
-#### Subject visits
+#### All visits of an item
 ``` php
 visits($post)->count();
 ```
+- Note: $post is a row of a model, i.e. $post = Post::find(22)
 
-#### Subject visits period
+
+#### Item's visits by a period  
 ``` php
 visits($post)->period('day')->count();
 ```
 
-#### All subjects
+## A model class visits
+
+#### All visits of a model type
 ``` php
 visits('App\Post')->count()
 ```
 
-#### All subjects period
+#### Visits of a model type in period
 ``` php
 visits('App\Post')->period('day')->count()
 ```
 
-## Countries :
+## Countries of visitors
 ``` php
 visits($post)->countries()
 ```
 
-## Referer :
+## Referers of visitors
 ``` php
 visits($post)->refs()
 ```
 
 
-## Resets :
+## Top or Lowest list per model type
 
-#### Subject visits
+#### Top/Lowest 10
+``` php
+visits('App\Post')->top(10)
+```
+``` php
+visits('App\Post')->low(10)
+```
+
+#### Uncached list
+``` php
+visits('App\Post')->fresh()->top(10)
+```
+- Note: you can always get uncached list by enabling `alwaysFresh` from package config.
+
+#### By a period of time
+``` php
+visits('App\Post')->period('month')->top(10)
+```
+
+
+## Reset and clear values
+
+#### Clear an item visits
 ``` php
 visits($post)->reset();
 ```
 
-#### Subject visits period
+#### Clear an item visits of specific period
 ``` php
 visits($post)->period('year')->reset()
 ```
 
-#### Subject recorded ips
+#### Clear recorded visitors' IPs
 ``` php
 visits($post)->reset('ips');
 visits($post)->reset('ips', '127.0.0.1');
 ```
 
-#### Reset factory
+#### Other
 ``` php
+//clear all visits of the given model and its items
+visits('App\Post')->reset()
+//clear all cache of the top/lowest list
+visits('App\Post')->reset('lists')
+//clear visits from all items of the given model in a period
+visits('App\Post')->period('year')->reset() 
+//...?
 visits('App\Post')->reset('factory')
-```
-
-#### Other :
-``` php
- * visits('App\Post')->reset()
- * visits('App\Post')->reset('lists')
- * visits('App\Post')->period('year')->reset() 
 ```
 
 ## Integration with Eloquent
 
-add ``visits`` method to your model :
+You can add a `visits` method to your model class:
 
 ```php
     public function visits()
@@ -172,7 +214,7 @@ add ``visits`` method to your model :
     }
 ```
 
-and you can access it by calling :
+Then you can use it as:
 
 ```php
     $post = Post::find(1);
