@@ -24,6 +24,23 @@ class VisitsTest extends TestCase
     }
 
     /** @test */
+    public function multi_tags_storing()
+    {
+        $userA = Post::create()->fresh();
+
+        visits($userA)->increment();
+
+        visits($userA, 'clicks')->increment();
+        visits($userA, 'clicks2')->increment();
+
+        $keys = Redis::keys('bareq:testing:*');
+        
+        $this->assertContains('bareq:testing:posts_visits', $keys);
+        $this->assertContains('bareq:testing:posts_clicks', $keys);
+        $this->assertContains('bareq:testing:posts_clicks2', $keys);
+    }
+
+    /** @test */
     public function multi_tags_visits()
     {
         $userA = Post::create()->fresh();

@@ -41,7 +41,7 @@ class Visits
     /**
      * Visits constructor.
      * @param $subject
-     * @param Keys|null $keys
+     * @param string $tag|null
      */
     public function __construct($subject = null, $tag = 'visits')
     {

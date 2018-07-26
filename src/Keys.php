@@ -18,6 +18,7 @@ class Keys
     /**
      * Keys constructor.
      * @param $subject
+     * @param $tag
      */
     public function __construct($subject, $tag)
     {
@@ -25,8 +26,8 @@ class Keys
         $this->prefix = config('bareq.redis_keys_prefix');
         $this->testing = app()->environment('testing') ? 'testing:' : '';
         $this->primary = (new $subject)->getKeyName();
-        $this->visits = $this->visits($subject);
         $this->tag = $tag;
+        $this->visits = $this->visits($subject);
 
         if ($subject instanceof Model) {
             $this->instanceOfModel = true;
@@ -54,7 +55,7 @@ class Keys
      */
     public function ip($ip)
     {
-        return "{$this->prefix}:$this->testing" . snake_case("recorded_ips:" . ($this->instanceOfModel ? "{$this->modelName}_{$this->id}:" : '') . $ip);
+        return "{$this->prefix}:$this->testing" . snake_case("recorded_ips:" . ($this->instanceOfModel ? "{$this->modelName}_{$this->tag}_{$this->id}:" : '') . $ip);
     }
 
 
