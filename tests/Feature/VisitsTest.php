@@ -12,15 +12,50 @@ class VisitsTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected static $runSetup = false;
+
     public function setUp()
     {
         parent::setUp();
 
-        $cc = Redis::keys('bareq:testing:*');
+        if (static::$runSetup) {
 
-        if (count($cc)) {
-            Redis::del($cc);
+            $this->app['config']['database.redis.laravel-visits'] = [
+                'host' => env('REDIS_HOST', 'localhost'),
+                'password' => env('REDIS_PASSWORD', null),
+                'port' => env('REDIS_PORT', 6379),
+                'database' => 0,
+                'read_timeout' => 60,
+            ];
+
+            $cc = Redis::keys('bareq:testing:*');
+
+            if (count($cc)) {
+                Redis::del($cc);
+            }
         }
+    }
+
+    /** @test * */
+    public function config_test_laravel_visits()
+    {
+        $this->app['config']['database.redis.laravel-visits'] = [
+            'host' => env('REDIS_HOST', 'localhost'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', 6379),
+            'database' => 0,
+            'read_timeout' => 60,
+        ];
+
+        $this->assertEquals('laravel-visits', visits(Post::create()->fresh())->connection());
+    }
+
+    /** @test * */
+    public function config_test_default()
+    {
+        $this->assertEmpty(visits(Post::create()->fresh())->connection());
+
+        static::$runSetup = true;
     }
 
     /** @test */
@@ -34,7 +69,7 @@ class VisitsTest extends TestCase
         visits($userA, 'clicks2')->increment();
 
         $keys = Redis::keys('bareq:testing:*');
-        
+
         $this->assertContains('bareq:testing:posts_visits', $keys);
         $this->assertContains('bareq:testing:posts_clicks', $keys);
         $this->assertContains('bareq:testing:posts_clicks2', $keys);

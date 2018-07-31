@@ -3,7 +3,6 @@
 namespace if4lcon\Bareq;
 
 use Carbon\Carbon;
-use function Composer\Autoload\includeFile;
 use Illuminate\Support\Facades\Redis;
 use Spatie\Referer\Referer;
 
@@ -37,6 +36,10 @@ class Visits
      * @var Keys
      */
     protected $keys;
+    /**
+     * @var Redis
+     */
+    public $redis;
 
     /**
      * Visits constructor.
@@ -46,6 +49,7 @@ class Visits
     public function __construct($subject = null, $tag = 'visits')
     {
         $config = config('bareq');
+        $this->redis = Redis::connection($this->connection());
         $this->periods = $config['periods'];
         $this->ipSeconds = $config['remember_ip'];
         $this->fresh = $config['always_fresh'];
@@ -53,6 +57,11 @@ class Visits
         $this->keys = new Keys($subject, $tag);
 
         $this->periodsSync();
+    }
+
+    public function connection()
+    {
+        return config('database.redis.laravel-visits') !== null ? 'laravel-visits' : null;
     }
 
     /**
@@ -128,10 +137,10 @@ class Visits
 
             if ($this->noExpiration($periodKey)) {
                 $expireInSeconds = $this->newExpiration($period);
-                Redis::incrby($periodKey . '_total', 0);
-                Redis::zincrby($periodKey, 0, 0);
-                Redis::expire($periodKey, $expireInSeconds);
-                Redis::expire($periodKey . '_total', $expireInSeconds);
+                $this->redis->incrby($periodKey . '_total', 0);
+                $this->redis->zincrby($periodKey, 0, 0);
+                $this->redis->expire($periodKey, $expireInSeconds);
+                $this->redis->expire($periodKey . '_total', $expireInSeconds);
             }
         }
     }
@@ -142,7 +151,7 @@ class Visits
      */
     protected function noExpiration($periodKey)
     {
-        return Redis::ttl($periodKey) == -1 || !Redis::exists($periodKey);
+        return $this->redis->ttl($periodKey) == -1 || !$this->redis->exists($periodKey);
     }
 
     /**
@@ -212,7 +221,7 @@ class Visits
     {
         $range = $isLow ? 'zrange' : 'zrevrange';
 
-        return Redis::$range($this->keys->visits . "_countries:{$this->keys->id}", 0, $limit, 'WITHSCORES');
+        return $this->redis->$range($this->keys->visits . "_countries:{$this->keys->id}", 0, $limit, 'WITHSCORES');
     }
 
     /**
@@ -226,7 +235,7 @@ class Visits
     {
         $range = $isLow ? 'zrange' : 'zrevrange';
 
-        return Redis::$range($this->keys->visits . "_referers:{$this->keys->id}", 0, $limit, 'WITHSCORES');
+        return $this->redis->$range($this->keys->visits . "_referers:{$this->keys->id}", 0, $limit, 'WITHSCORES');
     }
 
     /**
@@ -248,7 +257,7 @@ class Visits
      */
     public function recordedIp()
     {
-        return !Redis::set($this->keys->ip(request()->ip()), true, 'EX', $this->ipSeconds, 'NX');
+        return !$this->redis->set($this->keys->ip(request()->ip()), true, 'EX', $this->ipSeconds, 'NX');
     }
 
     /**
@@ -260,15 +269,15 @@ class Visits
     public function count()
     {
         if ($this->country) {
-            return Redis::zscore($this->keys->visits . "_countries:{$this->keys->id}", $this->country);
+            return $this->redis->zscore($this->keys->visits . "_countries:{$this->keys->id}", $this->country);
         } else if ($this->referer) {
-            return Redis::zscore($this->keys->visits . "_referers:{$this->keys->id}", $this->referer);
+            return $this->redis->zscore($this->keys->visits . "_referers:{$this->keys->id}", $this->referer);
         }
 
         return intval(
             (!$this->keys->instanceOfModel) ?
-                Redis::get($this->keys->visits . '_total') :
-                Redis::zscore($this->keys->visits, $this->keys->id)
+                $this->redis->get($this->keys->visits . '_total') :
+                $this->redis->zscore($this->keys->visits, $this->keys->id)
         );
     }
 
@@ -279,7 +288,7 @@ class Visits
      */
     public function timeLeft($period = false)
     {
-        return Carbon::now()->addSeconds(Redis::ttl(
+        return Carbon::now()->addSeconds($this->redis->ttl(
             $period ? $this->keys->period($period) : $this->keys->ip(request()->ip())
         ));
     }
@@ -297,28 +306,28 @@ class Visits
     public function increment($inc = 1, $force = false, $periods = true, $country = true, $ip = null, $refer = true)
     {
         if ($force || !$this->recordedIp()) {
-            Redis::zincrby($this->keys->visits, $inc, $this->keys->id);
-            Redis::incrby($this->keys->visits . '_total', $inc);
+            $this->redis->zincrby($this->keys->visits, $inc, $this->keys->id);
+            $this->redis->incrby($this->keys->visits . '_total', $inc);
 
 
             if ($country) {
                 $zz = $this->getCountry($ip);
-                Redis::zincrby($this->keys->visits . "_countries:{$this->keys->id}", $inc, $zz);
+                $this->redis->zincrby($this->keys->visits . "_countries:{$this->keys->id}", $inc, $zz);
             }
 
 
             $referer = app(Referer::class)->get();
 
             if ($refer && !empty($referer)) {
-                Redis::zincrby($this->keys->visits . "_referers:{$this->keys->id}", $inc, $referer);
+                $this->redis->zincrby($this->keys->visits . "_referers:{$this->keys->id}", $inc, $referer);
             }
 
             if ($periods) {
                 foreach ($this->periods as $period) {
                     $periodKey = $this->keys->period($period);
 
-                    Redis::zincrby($periodKey, $inc, $this->keys->id);
-                    Redis::incrby($periodKey . '_total', $inc);
+                    $this->redis->zincrby($periodKey, $inc, $this->keys->id);
+                    $this->redis->incrby($periodKey . '_total', $inc);
                 }
             }
         }
@@ -364,7 +373,7 @@ class Visits
     {
         $range = $isLow ? 'zrange' : 'zrevrange';
 
-        return array_map('intval', Redis::$range($visitsKey, 0, $limit - 1));
+        return array_map('intval', $this->redis->$range($visitsKey, 0, $limit - 1));
     }
 
     /**
@@ -375,7 +384,7 @@ class Visits
     protected function freshList($cacheKey, $visitsIds)
     {
         if (count($visitsIds)) {
-            Redis::del($cacheKey);
+            $this->redis->del($cacheKey);
 
             return ($this->subject)::whereIn($this->keys->primary, $visitsIds)
                 ->get()
@@ -383,7 +392,7 @@ class Visits
                     return array_search($subject->{$this->keys->primary}, $visitsIds);
                 })
                 ->each(function ($subject) use ($cacheKey) {
-                    Redis::rpush($cacheKey, serialize($subject));
+                    $this->redis->rpush($cacheKey, serialize($subject));
                 });
         }
 
@@ -397,7 +406,7 @@ class Visits
      */
     protected function cachedList($limit, $cacheKey)
     {
-        return collect(array_map('unserialize', Redis::lrange($cacheKey, 0, $limit - 1)));
+        return collect(array_map('unserialize', $this->redis->lrange($cacheKey, 0, $limit - 1)));
     }
 
 
@@ -439,6 +448,6 @@ class Visits
     public function expireAt($period, $time)
     {
         $periodKey = $this->keys->period($period);
-        return Redis::expire($periodKey, $time);
+        return $this->redis->expire($periodKey, $time);
     }
 }

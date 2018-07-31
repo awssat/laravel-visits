@@ -49,38 +49,38 @@ class Reset extends Visits
     public function visits()
     {
         if ($this->keys->id) {
-            Redis::zrem($this->keys->visits, $this->keys->id);
-            Redis::del($this->keys->visits . "_countries:{$this->keys->id}");
-            Redis::del($this->keys->visits . "_referers:{$this->keys->id}");
+            $this->redis->zrem($this->keys->visits, $this->keys->id);
+            $this->redis->del($this->keys->visits . "_countries:{$this->keys->id}");
+            $this->redis->del($this->keys->visits . "_referers:{$this->keys->id}");
 
             foreach ($this->periods as $period => $days) {
-                Redis::zrem($this->keys->period($period), $this->keys->id);
+                $this->redis->zrem($this->keys->period($period), $this->keys->id);
             }
 
             $this->ips();
         } else {
-            Redis::del($this->keys->visits);
-            Redis::del($this->keys->visits . '_total');
+            $this->redis->del($this->keys->visits);
+            $this->redis->del($this->keys->visits . '_total');
         }
 
     }
 
     public function allrefs()
     {
-        $cc = Redis::keys($this->keys->visits . '_referers:*');
+        $cc = $this->redis->keys($this->keys->visits . '_referers:*');
 
         if (count($cc)) {
-            Redis::del($cc);
+            $this->redis->del($cc);
         }
     }
 
 
     public function allcountries()
     {
-        $cc = Redis::keys($this->keys->visits . '_countries:*');
+        $cc = $this->redis->keys($this->keys->visits . '_countries:*');
 
         if (count($cc)) {
-            Redis::del($cc);
+            $this->redis->del($cc);
         }
     }
 
@@ -91,8 +91,8 @@ class Reset extends Visits
     {
         foreach ($this->periods as $period => $days) {
             $periodKey = $this->keys->period($period);
-            Redis::del($periodKey);
-            Redis::del($periodKey . '_total');
+            $this->redis->del($periodKey);
+            $this->redis->del($periodKey . '_total');
         }
     }
 
@@ -102,10 +102,10 @@ class Reset extends Visits
      */
     public function ips($ips = '*')
     {
-        $ips = Redis::keys($this->keys->ip($ips));
+        $ips = $this->redis->keys($this->keys->ip($ips));
 
         if (count($ips)) {
-            Redis::del($ips);
+            $this->redis->del($ips);
         }
     }
 
@@ -114,9 +114,9 @@ class Reset extends Visits
      */
     public function lists()
     {
-        $lists = Redis::keys($this->keys->cache());
+        $lists = $this->redis->keys($this->keys->cache());
         if (count($lists)) {
-            Redis::del($lists);
+            $this->redis->del($lists);
         }
     }
 }
