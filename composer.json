@@ -1,4 +1,4 @@
-K{
+{
     "name": "awssat/laravel-visits",
     "type": "library",
     "description": "Laravel Redis visits counter for Eloquent models",

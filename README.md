@@ -70,7 +70,7 @@ php artisan vendor:publish --provider="awssat\Visits\VisitsServiceProvider"
 
 ### Note : Redis Database Name
 
-- By default `laravel-visits` doesn't use the default laravel redis configuration see issue (see [issue #5](https://github.com/awssat/laravel-visits/issues/5))
+- By default `laravel-visits` doesn't use the default laravel redis configuration (see [issue #5](https://github.com/awssat/laravel-visits/issues/5))
 
 To prvent your data loss add a new conection on `config/database.php`
 
