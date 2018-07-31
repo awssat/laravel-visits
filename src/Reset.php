@@ -1,8 +1,6 @@
 <?php
 
-namespace if4lcon\Bareq;
-
-use Illuminate\Support\Facades\Redis;
+namespace awssat\Visits;
 
 class Reset extends Visits
 {

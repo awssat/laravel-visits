@@ -1,61 +1,41 @@
 <?php
 
-namespace if4lcon\Bareq\Tests\Feature;
+namespace awssat\Visits\Tests\Feature;
 
+use awssat\Visits\Tests\TestCase;
 use Carbon\Carbon;
-use if4lcon\Bareq\Tests\Post;
+use awssat\Visits\Tests\Post;
 use Illuminate\Support\Facades\Redis;
-use if4lcon\Bareq\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class VisitsTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected static $runSetup = false;
+    protected $redis;
 
     public function setUp()
     {
         parent::setUp();
 
-        if (static::$runSetup) {
-
-            $this->app['config']['database.redis.laravel-visits'] = [
+        $this->app['config']['database.redis.laravel-visits'] = [
                 'host' => env('REDIS_HOST', 'localhost'),
                 'password' => env('REDIS_PASSWORD', null),
                 'port' => env('REDIS_PORT', 6379),
-                'database' => 0,
-                'read_timeout' => 60,
-            ];
+                'database' => 3,
+       ];
 
-            $cc = Redis::keys('bareq:testing:*');
+        $this->redis = Redis::connection('laravel-visits');
 
-            if (count($cc)) {
-                Redis::del($cc);
-            }
+        if (count($cc = $this->redis->keys('visits:testing:*'))) {
+            $this->redis->del($cc);
         }
     }
 
     /** @test * */
-    public function config_test_laravel_visits()
+    public function laravel_visits_is_the_default_connection()
     {
-        $this->app['config']['database.redis.laravel-visits'] = [
-            'host' => env('REDIS_HOST', 'localhost'),
-            'password' => env('REDIS_PASSWORD', null),
-            'port' => env('REDIS_PORT', 6379),
-            'database' => 0,
-            'read_timeout' => 60,
-        ];
-
-        $this->assertEquals('laravel-visits', visits(Post::create()->fresh())->connection());
-    }
-
-    /** @test * */
-    public function config_test_default()
-    {
-        $this->assertEmpty(visits(Post::create()->fresh())->connection());
-
-        static::$runSetup = true;
+        $this->assertEquals('laravel-visits', config('visits.connection'));
     }
 
     /** @test */
@@ -68,11 +48,11 @@ class VisitsTest extends TestCase
         visits($userA, 'clicks')->increment();
         visits($userA, 'clicks2')->increment();
 
-        $keys = Redis::keys('bareq:testing:*');
+        $keys = $this->redis->keys('visits:testing:*');
 
-        $this->assertContains('bareq:testing:posts_visits', $keys);
-        $this->assertContains('bareq:testing:posts_clicks', $keys);
-        $this->assertContains('bareq:testing:posts_clicks2', $keys);
+        $this->assertContains('visits:testing:posts_visits', $keys);
+        $this->assertContains('visits:testing:posts_clicks', $keys);
+        $this->assertContains('visits:testing:posts_clicks2', $keys);
     }
 
     /** @test */
@@ -200,7 +180,7 @@ class VisitsTest extends TestCase
 
         $this->assertEquals(
             [2, 3],
-            visits('if4lcon\Bareq\Tests\Post')->top(5)->pluck('id')->toArray()
+            visits('awssat\Visits\Tests\Post')->top(5)->pluck('id')->toArray()
         );
 
     }
@@ -218,10 +198,10 @@ class VisitsTest extends TestCase
             '129.0.0.2',
             '124.0.0.2'
         ];
-        $key = config('bareq.redis_keys_prefix') . ":testing:recorded_ips:Post_1:";
+        $key = "visits:testing:recorded_ips:Post_1:";
 
         foreach ($ips as $ip) {
-            Redis::set( $key . $ip, true, 'EX', 15 * 60, 'NX');
+            $this->redis->set( $key . $ip, true, 'EX', 15 * 60, 'NX');
         }
 
         visits($post)->increment(10);
@@ -234,7 +214,7 @@ class VisitsTest extends TestCase
         visits($post)->reset('ips', '127.0.0.1');
 
 
-        $ips_in_redis = collect(Redis::keys(config('bareq.redis_keys_prefix') . ":testing:recorded_ips:*"))->map(function ($ip) use ($key) {
+        $ips_in_redis = collect($this->redis->keys(config('visits.redis_keys_prefix') . ":testing:recorded_ips:*"))->map(function ($ip) use ($key) {
             return str_replace($key, '', $ip);
         });
 
@@ -278,32 +258,32 @@ class VisitsTest extends TestCase
 
         $this->assertEquals(
             collect($arr)->sort()->reverse()->keys()->take(10)->toArray(),
-            visits('if4lcon\Bareq\Tests\Post')->period('day')->top(10)->pluck('id')->toArray()
+            visits('awssat\Visits\Tests\Post')->period('day')->top(10)->pluck('id')->toArray()
         );
 
         $this->assertEquals(
             collect($arr)->sort()->keys()->take(10)->toArray(),
-            visits('if4lcon\Bareq\Tests\Post')->period('day')->low(11)->pluck('id')->toArray()
+            visits('awssat\Visits\Tests\Post')->period('day')->low(11)->pluck('id')->toArray()
         );
 
 
-        visits('if4lcon\Bareq\Tests\Post')->period('day')->reset();
+        visits('awssat\Visits\Tests\Post')->period('day')->reset();
 
         $this->assertEquals(0,
-            visits('if4lcon\Bareq\Tests\Post')->period('day')->count()
+            visits('awssat\Visits\Tests\Post')->period('day')->count()
         );
 
         $this->assertEmpty(
-            visits('if4lcon\Bareq\Tests\Post')->period('day')->top(10)
+            visits('awssat\Visits\Tests\Post')->period('day')->top(10)
         );
 
         $this->assertNotEmpty(
-            visits('if4lcon\Bareq\Tests\Post')->top(10)
+            visits('awssat\Visits\Tests\Post')->top(10)
         );
 
         $this->assertEquals(
             collect($arr)->sum(),
-            visits('if4lcon\Bareq\Tests\Post')->count()
+            visits('awssat\Visits\Tests\Post')->count()
         );
 
     }
@@ -392,15 +372,15 @@ class VisitsTest extends TestCase
         visits($post3)->forceIncrement(2);
         visits($post4)->forceIncrement(1);
 
-        $fresh = visits('if4lcon\Bareq\Tests\Post')->top()->pluck('name');
+        $fresh = visits('awssat\Visits\Tests\Post')->top()->pluck('name');
 
         $post5->update(['name' => 'changed']);
 
-        $cached = visits('if4lcon\Bareq\Tests\Post')->top()->pluck('name');
+        $cached = visits('awssat\Visits\Tests\Post')->top()->pluck('name');
 
         $this->assertEquals($fresh->first(), $cached->first());
 
-        $fresh2 = visits('if4lcon\Bareq\Tests\Post')
+        $fresh2 = visits('awssat\Visits\Tests\Post')
             ->fresh()
             ->top()
             ->pluck('name');

@@ -1,9 +1,9 @@
-{
+K{
     "name": "awssat/laravel-visits",
     "type": "library",
     "description": "Laravel Redis visits counter for Eloquent models",
     "keywords": [
-        "Laravel", "Visits", "Counter", "Package",  "Redis",  "Cache",  "Php", "Bareq"
+        "Laravel", "Visits", "Counter", "Package",  "Redis",  "Cache",  "Php"
     ],
     "homepage": "https://github.com/awssat/laravel-visits",
     "license": "MIT",
@@ -30,7 +30,7 @@
     },
     "autoload": {
         "psr-4": {
-            "if4lcon\\Bareq\\": "src"
+            "awssat\\Visits\\": "src"
         },
         "files": [
             "src/helpers.php"
@@ -38,7 +38,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "if4lcon\\Bareq\\Tests\\": "tests"
+            "awssat\\Visits\\Tests\\": "tests"
         }
     },
     "scripts": {
@@ -52,10 +52,10 @@
         },
         "laravel": {
             "providers": [
-                "if4lcon\\Bareq\\BareqServiceProvider"
+                "awssat\\Visits\\VisitsServiceProvider"
             ],
             "aliases": {
-                "Visits": "if4lcon\\Bareq\\Visits"
+                "Visits": "awssat\\Visits\\Visits"
             }
         }
     },

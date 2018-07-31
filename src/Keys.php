@@ -1,6 +1,6 @@
 <?php
 
-namespace if4lcon\Bareq;
+namespace awssat\Visits;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,7 +23,7 @@ class Keys
     public function __construct($subject, $tag)
     {
         $this->modelName = strtolower(str_plural(class_basename(is_string($subject) ? $subject : get_class($subject))));
-        $this->prefix = config('bareq.redis_keys_prefix');
+        $this->prefix = config('visits.redis_keys_prefix');
         $this->testing = app()->environment('testing') ? 'testing:' : '';
         $this->primary = (new $subject)->getKeyName();
         $this->tag = $tag;

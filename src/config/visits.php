@@ -23,7 +23,7 @@ return [
     | Redis prefix
     |--------------------------------------------------------------------------
     */
-    'redis_keys_prefix' =>  'bareq',
+    'redis_keys_prefix' =>  'visits',
 
     /*
     |--------------------------------------------------------------------------
@@ -43,5 +43,16 @@ return [
     */
     'always_fresh' => false,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Redis Database Connection Name
+    |--------------------------------------------------------------------------
+    |
+    | When using "redis" you may specify a
+    | connection that should be used to manage your database storage. This should
+    | correspond to a connection in your database configuration options.
+    |
+    */
+    'connection' => 'laravel-visits',
 ];
 

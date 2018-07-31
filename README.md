@@ -54,13 +54,45 @@ composer require awssat/laravel-visits
 
 
 #### Before Laravel 5.5
-In Laravel 5.4. you'll manually need to register the `if4lcon\Bareq\BareqServiceProvider::class` service provider in `config/app.php`.
+In Laravel 5.4. you'll manually need to register the `awssat\Visits\VisitsServiceProvider::class` service provider in `config/app.php`.
 
 #### Config
 To adjust the library, you can publish the config file to your project using:
 ```
-php artisan vendor:publish --provider="if4lcon\Bareq\BareqServiceProvider"
+php artisan vendor:publish --provider="awssat\Visits\VisitsServiceProvider"
 ```
+
+### Upgrade to 1.4.0 from 1.3.*
+
+- Prfiex updated from `bareq` to `visits` if you missing your data try to revert prefex value to `bareq`
+  
+
+
+### Note : Redis Database Name
+
+- By default `laravel-visits` doesn't use the default laravel redis configuration see issue (see [issue #5](https://github.com/awssat/laravel-visits/issues/5))
+
+To prvent your data loss add a new conection on `config/database.php`
+
+``` php
+
+        'laravel-visits' => [
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', 6379),
+            'database' => 3, // anything from 1 to 15, except 0 (or what is set in default)
+        ],
+
+```
+
+and you can define your redis connection name on `config/visits.php`
+
+``` php
+
+'connection' => 'default'
+
+```
+
 
 ## Usage
 

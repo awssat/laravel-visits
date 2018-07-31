@@ -1,10 +1,10 @@
 <?php
 
-namespace if4lcon\Bareq\Tests;
+namespace awssat\Visits\Tests;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
-use if4lcon\Bareq\BareqServiceProvider;
+use awssat\Visits\VisitsServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 use Spatie\Referer\Referer;
 use Spatie\Referer\CaptureReferer;
@@ -56,7 +56,7 @@ abstract class TestCase extends BaseTestCase
         return [
             GeoIPServiceProvider::class,
             RefererServiceProvider::class,
-            BareqServiceProvider::class,
+            VisitsServiceProvider::class,
         ];
     }
 

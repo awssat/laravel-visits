@@ -1,6 +1,6 @@
 <?php
 
-namespace if4lcon\Bareq;
+namespace awssat\Visits;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Redis;

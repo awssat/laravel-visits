@@ -1,10 +1,10 @@
 <?php
 
-namespace if4lcon\Bareq;
+namespace awssat\Visits;
 
 use Illuminate\Support\ServiceProvider;
 
-class BareqServiceProvider extends ServiceProvider
+class VisitsServiceProvider extends ServiceProvider
 {
     /**
      * Perform post-registration booting of services.
