@@ -48,8 +48,8 @@ class Visits
      */
     public function __construct($subject = null, $tag = 'visits')
     {
-        $config = config('bareq');
-        $this->redis = Redis::connection($this->connection());
+        $config = config('visits');
+        $this->redis = Redis::connection($config['connection']);
         $this->periods = $config['periods'];
         $this->ipSeconds = $config['remember_ip'];
         $this->fresh = $config['always_fresh'];
@@ -57,11 +57,6 @@ class Visits
         $this->keys = new Keys($subject, $tag);
 
         $this->periodsSync();
-    }
-
-    public function connection()
-    {
-        return config('database.redis.laravel-visits') !== null ? 'laravel-visits' : null;
     }
 
     /**

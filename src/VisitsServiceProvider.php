@@ -26,7 +26,7 @@ class BareqServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/config/visits.php', 'bareq'
+            __DIR__.'/config/visits.php', 'visits'
         );
     }
 }
