@@ -229,12 +229,11 @@ class Visits
      */
     public function top($limit = 5, $isLow = false)
     {
-        $visitsIds = $this->getVisits($limit, $this->keys->visits, $isLow);
         $cacheKey = $this->keys->cache($limit, $isLow);
         $cachedList = $this->cachedList($limit, $cacheKey);
-        $cachedIds = $cachedList->pluck('id')->toArray();
+        $visitsIds = $this->getVisits($limit, $this->keys->visits, $isLow);
 
-        if($visitsIds === $cachedIds && ! $this->fresh) {
+        if($visitsIds === $cachedList->pluck('id')->toArray() && ! $this->fresh) {
             return $cachedList;
         }
 
@@ -289,10 +288,7 @@ class Visits
      */
     public function recordedIp()
     {
-        $ip = request()->ip();
-        $key = $this->keys->ip($ip);
-
-        return ! $this->redis->set($key, true, 'EX', $this->ipSeconds, 'NX');
+        return ! $this->redis->set($this->keys->ip(request()->ip()), true, 'EX', $this->ipSeconds, 'NX');
     }
 
     /**
@@ -330,6 +326,36 @@ class Visits
 
 
     /**
+     * @param $inc
+     */
+    protected function recordCountry($inc)
+    {
+        $this->redis->zincrby($this->keys->visits . "_countries:{$this->keys->id}", $inc, $this->getCountry());
+    }
+
+    /**
+     * @param $inc
+     */
+    protected function recordRefer($inc)
+    {
+        $referer = app(Referer::class)->get();
+        $this->redis->zincrby($this->keys->visits . "_referers:{$this->keys->id}", $inc, $referer);
+    }
+
+    /**
+     * @param $inc
+     */
+    protected function recordPeriods($inc)
+    {
+        foreach ($this->periods as $period) {
+            $periodKey = $this->keys->period($period);
+
+            $this->redis->zincrby($periodKey, $inc, $this->keys->id);
+            $this->redis->incrby($periodKey . '_total', $inc);
+        }
+    }
+
+    /**
      * Increment a new/old subject to the cache cache.
      *
      * @param int $inc
@@ -338,32 +364,14 @@ class Visits
      * @param bool $country
      * @param bool $refer
      */
-    public function increment($inc = 1, $force = false, $periods = true, $country = true, $ip = null, $refer = true)
+    public function increment($inc = 1, $force = false, $periods = true, $country = true, $refer = true)
     {
         if ($force || !$this->recordedIp()) {
             $this->redis->zincrby($this->keys->visits, $inc, $this->keys->id);
             $this->redis->incrby($this->keys->visits . '_total', $inc);
 
-
-            if ($country) {
-                $zz = $this->getCountry($ip);
-                $this->redis->zincrby($this->keys->visits . "_countries:{$this->keys->id}", $inc, $zz);
-            }
-
-
-            $referer = app(Referer::class)->get();
-
-            if ($refer && !empty($referer)) {
-                $this->redis->zincrby($this->keys->visits . "_referers:{$this->keys->id}", $inc, $referer);
-            }
-
-            if ($periods) {
-                foreach ($this->periods as $period) {
-                    $periodKey = $this->keys->period($period);
-
-                    $this->redis->zincrby($periodKey, $inc, $this->keys->id);
-                    $this->redis->incrby($periodKey . '_total', $inc);
-                }
+            foreach (['country', 'refer', 'periods'] as $method) {
+                $$method && $this->{'record'. studly_case($method)}($inc);
             }
         }
     }
@@ -450,34 +458,13 @@ class Visits
      *  Gets visitor country code
      * @return mixed|string
      */
-    public function getCountry($ip = null)
+    public function getCountry()
     {
-        if (session('country_code')) {
-            return session('country_code');
-        }
-
-        $country_code = 'zz';
-
-        if (isset($_SERVER["HTTP_CF_IPCOUNTRY"])) {
-            $country_code = strtolower($_SERVER["HTTP_CF_IPCOUNTRY"]);
-        }
-
-        if ($country_code === 'zz' && app()->has('geoip')) {
-
-            $geo_info = geoip()->getLocation($ip);
-
-            if (!empty($geo_info) && isset($geo_info['iso_code'])) {
-                $country_code = strtolower($geo_info['iso_code']);
-            }
-
-        }
-
-        session(['country_code', $country_code]);
-        return $country_code;
+        return strtolower(geoip()->getLocation()->iso_code);
     }
 
     /**
-     * @param $period
+     * @param $period®
      * @param int $time
      * @return bool
      */
