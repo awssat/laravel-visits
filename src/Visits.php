@@ -234,7 +234,11 @@ class Visits
         $cachedList = $this->cachedList($limit, $cacheKey);
         $cachedIds = $cachedList->pluck('id')->toArray();
 
-        return ($visitsIds === $cachedIds && !$this->fresh) ? $cachedList : $this->freshList($cacheKey, $visitsIds);
+        if($visitsIds === $cachedIds && ! $this->fresh) {
+            return $cachedList;
+        }
+
+        return $this->freshList($cacheKey, $visitsIds);
     }
 
 
@@ -285,7 +289,10 @@ class Visits
      */
     public function recordedIp()
     {
-        return !$this->redis->set($this->keys->ip(request()->ip()), true, 'EX', $this->ipSeconds, 'NX');
+        $ip = request()->ip();
+        $key = $this->keys->ip($ip);
+
+        return ! $this->redis->set($key, true, 'EX', $this->ipSeconds, 'NX');
     }
 
     /**
@@ -418,8 +425,7 @@ class Visits
                 ->get()
                 ->sortBy(function ($subject) use ($visitsIds) {
                     return array_search($subject->{$this->keys->primary}, $visitsIds);
-                })
-                ->each(function ($subject) use ($cacheKey) {
+                })->each(function ($subject) use ($cacheKey) {
                     $this->redis->rpush($cacheKey, serialize($subject));
                 });
         }
@@ -434,7 +440,9 @@ class Visits
      */
     protected function cachedList($limit, $cacheKey)
     {
-        return collect(array_map('unserialize', $this->redis->lrange($cacheKey, 0, $limit - 1)));
+        return collect(
+            array_map('unserialize', $this->redis->lrange($cacheKey, 0, $limit - 1))
+        );
     }
 
 
