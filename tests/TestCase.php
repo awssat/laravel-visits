@@ -89,8 +89,17 @@ abstract class TestCase extends BaseTestCase
     private function runTestMigrations()
     {
         $schema = $this->app['db']->connection()->getSchemaBuilder();
-        if (! $schema->hasTable('post')) {
-            $schema->create('post', function (Blueprint $table) {
+        if (! $schema->hasTable('posts')) {
+            $schema->create('posts', function (Blueprint $table) {
+                $table->increments('id');
+                $table->string('name')->nullable();
+                $table->unsignedInteger('user_id')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        if (! $schema->hasTable('users')) {
+            $schema->create('users', function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('name')->nullable();
                 $table->timestamps();
@@ -102,5 +111,21 @@ abstract class TestCase extends BaseTestCase
 class Post extends Model
 {
     protected $guarded = [];
-    protected $table = 'post';
+    protected $table = 'posts';
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+}
+
+class User extends Model
+{
+    protected $guarded = [];
+    protected $table = 'users';
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
 }

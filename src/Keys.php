@@ -55,7 +55,8 @@ class Keys
      */
     public function ip($ip)
     {
-        return "{$this->prefix}:$this->testing" . snake_case("recorded_ips:" . ($this->instanceOfModel ? "{$this->modelName}_{$this->tag}_{$this->id}:" : '') . $ip);
+        return $this->visits . '_' .
+            snake_case("recorded_ips:" . ($this->instanceOfModel ? "{$this->id}:" : '') . $ip);
     }
 
 
@@ -66,11 +67,13 @@ class Keys
      */
     public function cache($limit = '*', $isLow = false)
     {
-        $key = "{$this->prefix}:$this->testing" . "lists";
+        $key = $this->visits . "_lists";
+
         if ($limit == '*') {
             return "{$key}:*";
         }
-        return "{$key}:" . ($isLow ? "low" : "top") . "{$limit}_{$this->modelName}";
+
+        return "{$key}:" . ($isLow ? "low" : "top") . "{$limit}";
     }
 
     /**
@@ -80,5 +83,14 @@ class Keys
     public function period($period)
     {
         return "{$this->visits}_{$period}";
+    }
+
+    /**
+     * @param $relation
+     * @param $id
+     */
+    public function append($relation, $id)
+    {
+        $this->visits .= "_{$relation}_{$id}";
     }
 }

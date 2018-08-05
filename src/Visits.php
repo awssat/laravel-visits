@@ -3,6 +3,7 @@
 namespace awssat\Visits;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Redis;
 use Spatie\Referer\Referer;
 
@@ -57,6 +58,38 @@ class Visits
         $this->keys = new Keys($subject, $tag);
 
         $this->periodsSync();
+    }
+
+    /**
+     * @param $attribute
+     * @return $this
+     */
+    public function __get($attribute)
+    {
+        if($this->keys->instanceOfModel && $relation = $this->subject->$attribute) {
+            $this->keys->append($attribute, $relation->{$relation->getKeyName()});
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param $subject
+     * @return $this
+     */
+    public function by($subject)
+    {
+        if($subject instanceof Model) {
+            $this->keys->append(strtolower(str_singular(class_basename(get_class($subject)))),
+                $subject->{$subject->getKeyName()});
+        } else if (is_array($subject)) {
+            $subject = collect($subject);
+            $this->keys->append($subject->flip()->first(), $subject->first());
+        } else {
+            $this->keys->append('custom', $subject);
+        }
+
+        return $this;
     }
 
     /**

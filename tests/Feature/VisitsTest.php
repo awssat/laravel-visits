@@ -5,6 +5,7 @@ namespace awssat\Visits\Tests\Feature;
 use awssat\Visits\Tests\TestCase;
 use Carbon\Carbon;
 use awssat\Visits\Tests\Post;
+use awssat\Visits\Tests\User;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -30,6 +31,65 @@ class VisitsTest extends TestCase
         if (count($cc = $this->redis->keys('visits:testing:*'))) {
             $this->redis->del($cc);
         }
+    }
+
+    /** @test * */
+    public function by_can_accept_array()
+    {
+        User::create();
+        $post = Post::create();
+
+        visits($post)->by(['user' => 1])->increment();
+        $this->assertEquals(1, visits($post)->by(['user' => 1])->count());
+        $this->assertEquals(0, visits($post)->count());
+    }
+
+    /** @test * */
+    public function visits_by_user_lists()
+    {
+        $user = User::create();
+
+        foreach (range(1, 20) as $id) {
+            $post = Post::create();
+            visits($post)->by($user)->increment();
+        }
+
+        $top_visits_overall = visits('awssat\Visits\Tests\Post')
+            ->top(10)
+            ->toArray();
+
+        $this->assertEmpty($top_visits_overall);
+
+        $top_visits = visits('awssat\Visits\Tests\Post')
+            ->by($user)
+            ->top(20)
+            ->toArray();
+
+        $this->assertCount(20, $top_visits);
+    }
+
+    /** @test * */
+    public function visits_by_user()
+    {
+        $user = User::create();
+        $post = Post::create();
+
+        visits($post)->by($user)->increment();
+
+        $this->assertEquals(1, visits($post)->by($user)->count());
+        $this->assertEquals(0, visits($post)->count());
+    }
+
+    /** @test * */
+    public function belongs_to_relation_test()
+    {
+        $user = User::create();
+        $post = $user->posts()->create();
+
+        visits($post)->creator->increment();
+
+        $this->assertEquals(1, visits($post)->creator->count());
+        $this->assertEquals(0, visits($post)->count());
     }
 
     /** @test * */
@@ -198,7 +258,7 @@ class VisitsTest extends TestCase
             '129.0.0.2',
             '124.0.0.2'
         ];
-        $key = "visits:testing:recorded_ips:Post_1:";
+        $key = "visits:testing:posts_visits_recorded_ips:1:";
 
         foreach ($ips as $ip) {
             $this->redis->set( $key . $ip, true, 'EX', 15 * 60, 'NX');
@@ -214,7 +274,7 @@ class VisitsTest extends TestCase
         visits($post)->reset('ips', '127.0.0.1');
 
 
-        $ips_in_redis = collect($this->redis->keys(config('visits.redis_keys_prefix') . ":testing:recorded_ips:*"))->map(function ($ip) use ($key) {
+        $ips_in_redis = collect($this->redis->keys(config('visits.redis_keys_prefix') . ":testing:posts_visits_recorded_ips:*"))->map(function ($ip) use ($key) {
             return str_replace($key, '', $ip);
         });
 
@@ -314,8 +374,6 @@ class VisitsTest extends TestCase
      */
     public function it_counts_visits()
     {
-
-
         $post = Post::create()->fresh();
 
         $this->assertEquals(0,
