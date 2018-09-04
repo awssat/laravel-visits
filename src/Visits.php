@@ -2,13 +2,19 @@
 
 namespace awssat\Visits;
 
+use awssat\Visits\Traits\Lists;
+use awssat\Visits\Traits\Periods;
+use awssat\Visits\Traits\Record;
+use awssat\Visits\Traits\Setters;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Redis;
-use Spatie\Referer\Referer;
+use Jaybizzle\CrawlerDetect\CrawlerDetect;
 
 class Visits
 {
+    use Record, Lists, Periods, Setters;
+
     /**
      * @var mixed
      */
@@ -41,6 +47,10 @@ class Visits
      * @var Redis
      */
     public $redis;
+    /**
+     * @var boolean
+     */
+    public $ignoreCrawlers = false;
 
     /**
      * Visits constructor.
@@ -54,6 +64,7 @@ class Visits
         $this->periods = $config['periods'];
         $this->ipSeconds = $config['remember_ip'];
         $this->fresh = $config['always_fresh'];
+        $this->ignoreCrawlers = $config['ignore_crawlers'];
         $this->subject = $subject;
         $this->keys = new Keys($subject, $tag);
 
@@ -93,122 +104,6 @@ class Visits
     }
 
     /**
-     * Return fresh cache from database
-     * @return $this
-     */
-    public function fresh()
-    {
-        $this->fresh = true;
-
-        return $this;
-    }
-
-    /**
-     * set x seconds for ip expiration
-     *
-     * @param $seconds
-     * @return $this
-     */
-    public function seconds($seconds)
-    {
-        $this->ipSeconds = $seconds;
-
-        return $this;
-    }
-
-
-    /**
-     * @param $country
-     * @return $this
-     */
-    public function country($country)
-    {
-        $this->country = $country;
-
-        return $this;
-    }
-
-
-    /**
-     * @param $referer
-     * @return $this
-     */
-    public function referer($referer)
-    {
-        $this->referer = $referer;
-
-        return $this;
-    }
-
-    /**
-     * Change period
-     *
-     * @param $period
-     * @return $this
-     */
-    public function period($period)
-    {
-        if (in_array($period, array_keys($this->periods))) {
-            $this->keys->visits = $this->keys->period($period);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Sync periods times
-     */
-    protected function periodsSync()
-    {
-        foreach ($this->periods as $period) {
-            $periodKey = $this->keys->period($period);
-
-            if ($this->noExpiration($periodKey)) {
-                $expireInSeconds = $this->newExpiration($period);
-                $this->redis->incrby($periodKey . '_total', 0);
-                $this->redis->zincrby($periodKey, 0, 0);
-                $this->redis->expire($periodKey, $expireInSeconds);
-                $this->redis->expire($periodKey . '_total', $expireInSeconds);
-            }
-        }
-    }
-
-    /**
-     * @param $periodKey
-     * @return bool
-     */
-    protected function noExpiration($periodKey)
-    {
-        return $this->redis->ttl($periodKey) == -1 || !$this->redis->exists($periodKey);
-    }
-
-    /**
-     * @param $period
-     * @return int
-     */
-    protected function newExpiration($period)
-    {
-        $expireInSeconds = 0;
-
-        switch ($period) {
-            case 'day':
-                $expireInSeconds = Carbon::now()->endOfDay()->timestamp - Carbon::now()->timestamp;
-                break;
-            case 'week':
-                $expireInSeconds = Carbon::now()->endOfWeek()->timestamp - Carbon::now()->timestamp;
-                break;
-            case 'month':
-                $expireInSeconds = Carbon::now()->endOfMonth()->timestamp - Carbon::now()->timestamp;
-                break;
-            case 'year':
-                $expireInSeconds = Carbon::now()->endOfYear()->timestamp - Carbon::now()->timestamp;
-                break;
-        }
-
-        return $expireInSeconds + 1;
-    }
-
-    /**
      * Reset methods
      *
      * @param $method
@@ -218,66 +113,6 @@ class Visits
     public function reset($method = 'visits', $args = '')
     {
         return new Reset($this, $method, $args);
-    }
-
-    /**
-     * Fetch all time trending subjects.
-     *
-     * @param int $limit
-     * @param bool $isLow
-     * @return \Illuminate\Support\Collection|array
-     */
-    public function top($limit = 5, $isLow = false)
-    {
-        $cacheKey = $this->keys->cache($limit, $isLow);
-        $cachedList = $this->cachedList($limit, $cacheKey);
-        $visitsIds = $this->getVisits($limit, $this->keys->visits, $isLow);
-
-        if($visitsIds === $cachedList->pluck('id')->toArray() && ! $this->fresh) {
-            return $cachedList;
-        }
-
-        return $this->freshList($cacheKey, $visitsIds);
-    }
-
-
-    /**
-     * Top/low countries
-     *
-     * @param int $limit
-     * @param bool $isLow
-     * @return mixed
-     */
-    public function countries($limit = -1, $isLow = false)
-    {
-        $range = $isLow ? 'zrange' : 'zrevrange';
-
-        return $this->redis->$range($this->keys->visits . "_countries:{$this->keys->id}", 0, $limit, 'WITHSCORES');
-    }
-
-    /**
-     * top/lows refs
-     *
-     * @param int $limit
-     * @param bool $isLow
-     * @return mixed
-     */
-    public function refs($limit = -1, $isLow = false)
-    {
-        $range = $isLow ? 'zrange' : 'zrevrange';
-
-        return $this->redis->$range($this->keys->visits . "_referers:{$this->keys->id}", 0, $limit, 'WITHSCORES');
-    }
-
-    /**
-     * Fetch lowest subjects.
-     *
-     * @param int $limit
-     * @return \Illuminate\Support\Collection|array
-     */
-    public function low($limit = 5)
-    {
-        return $this->top($limit, true);
     }
 
     /**
@@ -324,39 +159,13 @@ class Visits
         ));
     }
 
-
-    /**
-     * @param $inc
-     */
-    protected function recordCountry($inc)
+    protected function isCrawler()
     {
-        $this->redis->zincrby($this->keys->visits . "_countries:{$this->keys->id}", $inc, $this->getCountry());
+        return $this->ignoreCrawlers && app(CrawlerDetect::class)->isCrawler();
     }
 
     /**
-     * @param $inc
-     */
-    protected function recordRefer($inc)
-    {
-        $referer = app(Referer::class)->get();
-        $this->redis->zincrby($this->keys->visits . "_referers:{$this->keys->id}", $inc, $referer);
-    }
-
-    /**
-     * @param $inc
-     */
-    protected function recordPeriods($inc)
-    {
-        foreach ($this->periods as $period) {
-            $periodKey = $this->keys->period($period);
-
-            $this->redis->zincrby($periodKey, $inc, $this->keys->id);
-            $this->redis->incrby($periodKey . '_total', $inc);
-        }
-    }
-
-    /**
-     * Increment a new/old subject to the cache cache.
+     * Increment a new/old subject to the cache.
      *
      * @param int $inc
      * @param bool $force
@@ -366,16 +175,16 @@ class Visits
      */
     public function increment($inc = 1, $force = false, $periods = true, $country = true, $refer = true)
     {
-        if ($force || !$this->recordedIp()) {
+        if ($force OR !$this->isCrawler() && !$this->recordedIp()) {
             $this->redis->zincrby($this->keys->visits, $inc, $this->keys->id);
             $this->redis->incrby($this->keys->visits . '_total', $inc);
 
+            //NOTE: $method is parameter also .. ($periods,$country,$refer)
             foreach (['country', 'refer', 'periods'] as $method) {
-                $$method && $this->{'record'. studly_case($method)}($inc);
+                $$method && $this->{'record' . studly_case($method)}($inc);
             }
         }
     }
-
 
     /**
      * @param int $inc
@@ -407,64 +216,7 @@ class Visits
     }
 
     /**
-     * @param $limit
-     * @param $visitsKey
-     * @param bool $isLow
-     * @return mixed
-     */
-    protected function getVisits($limit, $visitsKey, $isLow = false)
-    {
-        $range = $isLow ? 'zrange' : 'zrevrange';
-
-        return array_map('intval', $this->redis->$range($visitsKey, 0, $limit - 1));
-    }
-
-    /**
-     * @param $cacheKey
-     * @param $visitsIds
-     * @return mixed
-     */
-    protected function freshList($cacheKey, $visitsIds)
-    {
-        if (count($visitsIds)) {
-            $this->redis->del($cacheKey);
-
-            return ($this->subject)::whereIn($this->keys->primary, $visitsIds)
-                ->get()
-                ->sortBy(function ($subject) use ($visitsIds) {
-                    return array_search($subject->{$this->keys->primary}, $visitsIds);
-                })->each(function ($subject) use ($cacheKey) {
-                    $this->redis->rpush($cacheKey, serialize($subject));
-                });
-        }
-
-        return [];
-    }
-
-    /**
-     * @param $limit
-     * @param $cacheKey
-     * @return \Illuminate\Support\Collection|array
-     */
-    protected function cachedList($limit, $cacheKey)
-    {
-        return collect(
-            array_map('unserialize', $this->redis->lrange($cacheKey, 0, $limit - 1))
-        );
-    }
-
-
-    /**
-     *  Gets visitor country code
-     * @return mixed|string
-     */
-    public function getCountry()
-    {
-        return strtolower(geoip()->getLocation()->iso_code);
-    }
-
-    /**
-     * @param $period®
+     * @param $period
      * @param int $time
      * @return bool
      */

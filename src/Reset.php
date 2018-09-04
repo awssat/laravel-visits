@@ -4,7 +4,7 @@ namespace awssat\Visits;
 
 class Reset extends Visits
 {
-    protected $visits;
+    protected $keys;
 
     /**
      * Reset constructor.
