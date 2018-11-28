@@ -242,7 +242,7 @@ class VisitsTest extends TestCase
 
         $this->assertEquals(
             [2, 3],
-            visits('awssat\Visits\Tests\Post')->top(5)->pluck('id')->toArray()
+            visits('awssat\Visits\Tests\Post')->top(5)->pluck('ID')->toArray()
         );
 
     }
@@ -320,12 +320,12 @@ class VisitsTest extends TestCase
 
         $this->assertEquals(
             collect($arr)->sort()->reverse()->keys()->take(10)->toArray(),
-            visits('awssat\Visits\Tests\Post')->period('day')->top(10)->pluck('id')->toArray()
+            visits('awssat\Visits\Tests\Post')->period('day')->top(10)->pluck('ID')->toArray()
         );
 
         $this->assertEquals(
             collect($arr)->sort()->keys()->take(10)->toArray(),
-            visits('awssat\Visits\Tests\Post')->period('day')->low(11)->pluck('id')->toArray()
+            visits('awssat\Visits\Tests\Post')->period('day')->low(11)->pluck('ID')->toArray()
         );
 
 
@@ -420,11 +420,11 @@ class VisitsTest extends TestCase
      */
     public function it_list_from_cache()
     {
-        $post1 = Post::create(['id' => 1, 'name' => '1'])->fresh();
-        $post2 = Post::create(['id' => 2, 'name' => '2'])->fresh();
-        $post3 = Post::create(['id' => 3, 'name' => '3'])->fresh();
-        $post4 = Post::create(['id' => 4, 'name' => '4'])->fresh();
-        $post5 = Post::create(['id' => 5, 'name' => '5'])->fresh();
+        $post1 = Post::create(['ID' => 1, 'name' => '1'])->fresh();
+        $post2 = Post::create(['ID' => 2, 'name' => '2'])->fresh();
+        $post3 = Post::create(['ID' => 3, 'name' => '3'])->fresh();
+        $post4 = Post::create(['ID' => 4, 'name' => '4'])->fresh();
+        $post5 = Post::create(['ID' => 5, 'name' => '5'])->fresh();
 
         visits($post5)->forceIncrement(5);
         visits($post1)->forceIncrement(4);

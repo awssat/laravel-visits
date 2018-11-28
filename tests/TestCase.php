@@ -91,7 +91,7 @@ abstract class TestCase extends BaseTestCase
         $schema = $this->app['db']->connection()->getSchemaBuilder();
         if (! $schema->hasTable('posts')) {
             $schema->create('posts', function (Blueprint $table) {
-                $table->increments('id');
+                $table->increments('ID');
                 $table->string('name')->nullable();
                 $table->unsignedInteger('user_id')->nullable();
                 $table->timestamps();
@@ -112,6 +112,7 @@ class Post extends Model
 {
     protected $guarded = [];
     protected $table = 'posts';
+    protected $primaryKey = 'ID';
 
     public function creator()
     {

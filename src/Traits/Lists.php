@@ -17,7 +17,7 @@ trait Lists
         $cachedList = $this->cachedList($limit, $cacheKey);
         $visitsIds = $this->getVisitsIds($limit, $this->keys->visits, $isLow);
 
-        if($visitsIds === $cachedList->pluck('id')->toArray() && ! $this->fresh) {
+        if ($visitsIds === $cachedList->pluck($this->keys->primary)->toArray() && ! $this->fresh) {
             return $cachedList;
         }
 
