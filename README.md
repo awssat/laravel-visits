@@ -107,7 +107,6 @@ Where:
 #### Tags
 - You can track multiple kinds of visits to a single model using the tags as `visits($model, 'tag1')->increment()`
 
-
 ## Increments and Decrements
 
 #### Increment
@@ -221,6 +220,28 @@ visits($post)->period('year')->reset()
 ``` php
 visits($post)->reset('ips');
 visits($post)->reset('ips', '127.0.0.1');
+```
+
+
+### Periods options
+
+- minute
+- hour
+- xhours [1hours ... to 12hours]
+- day
+- week
+- month
+- year
+- quarter
+- decade
+- century
+
+you also can make your custom period by adding a carbon marco in appserviceprovider:
+
+```php
+Carbon::macro('endOf...', function () {
+    //
+});
 ```
 
 #### Other
