@@ -3,6 +3,7 @@
 namespace awssat\Visits\Traits;
 
 use Carbon\Carbon;
+use Exception;
 
 trait Periods
 {
@@ -36,26 +37,34 @@ trait Periods
     /**
      * @param $period
      * @return int
+     * @throws Exception
      */
     protected function newExpiration($period)
     {
-        $expireInSeconds = 0;
-
-        switch ($period) {
-            case 'day':
-                $expireInSeconds = Carbon::now()->endOfDay()->timestamp - Carbon::now()->timestamp;
-                break;
-            case 'week':
-                $expireInSeconds = Carbon::now()->endOfWeek()->timestamp - Carbon::now()->timestamp;
-                break;
-            case 'month':
-                $expireInSeconds = Carbon::now()->endOfMonth()->timestamp - Carbon::now()->timestamp;
-                break;
-            case 'year':
-                $expireInSeconds = Carbon::now()->endOfYear()->timestamp - Carbon::now()->timestamp;
-                break;
+        try {
+            $periodCarbon = $this->xHoursPeriod($period) ??
+                Carbon::now()->{'endOf' . studly_case($period)}();
+        } catch (Exception $exception) {
+            throw new Exception('Wrong period : ' . $period .
+                ' please update your visits.php config');
         }
 
-        return $expireInSeconds + 1;
+        return ($periodCarbon->timestamp - Carbon::now()->timestamp) + 1;
+    }
+
+    /**
+     * @param $period
+     * @return mixed
+     */
+    protected function xHoursPeriod($period)
+    {
+        return collect(range(1, 12))->map(function ($hour) {
+                return ['method' => $hour . 'hours', 'hours' => $hour];
+            })->where('method', $period)
+            ->pluck('hours')
+            ->map(function ($hours) {
+                return Carbon::now()->endOfxHours($hours);
+            })
+            ->first();
     }
 }

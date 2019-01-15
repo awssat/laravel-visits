@@ -22,16 +22,16 @@ class Keys
      */
     public function __construct($subject, $tag)
     {
-        $this->modelName = strtolower(str_plural(class_basename(is_string($subject) ? $subject : get_class($subject))));
+        $this->modelName = $this->pluralModelName($subject);
         $this->prefix = config('visits.redis_keys_prefix');
         $this->testing = app()->environment('testing') ? 'testing:' : '';
         $this->primary = (new $subject)->getKeyName();
         $this->tag = $tag;
-        $this->visits = $this->visits($subject);
+        $this->visits = $this->visits();
 
         if ($subject instanceof Model) {
             $this->instanceOfModel = true;
-            $this->modelName = strtolower(str_singular(class_basename(get_class($subject))));
+            $this->modelName = $this->modelName($subject);
             $this->id = $subject->{$subject->getKeyName()};
         }
     }
@@ -39,14 +39,11 @@ class Keys
     /**
      * Get cache key
      *
-     * @param $key
      * @return string
      */
-    public function visits($key)
+    public function visits()
     {
-        return "{$this->prefix}:$this->testing" .
-            strtolower(str_plural(class_basename(is_string($key) ? $key : get_class($key))))
-            . "_{$this->tag}";
+        return "{$this->prefix}:$this->testing" . $this->modelName . "_{$this->tag}";
     }
 
     /**
@@ -92,5 +89,23 @@ class Keys
     public function append($relation, $id)
     {
         $this->visits .= "_{$relation}_{$id}";
+    }
+
+    /**
+     * @param $subject
+     * @return string
+     */
+    public function modelName($subject)
+    {
+        return strtolower(str_singular(class_basename(get_class($subject))));
+    }
+
+    /**
+     * @param $subject
+     * @return string
+     */
+    public function pluralModelName($subject)
+    {
+        return strtolower(str_plural(class_basename(is_string($subject) ? $subject : get_class($subject))));
     }
 }

@@ -61,7 +61,7 @@ trait Setters
      */
     public function period($period)
     {
-        if (in_array($period, array_keys($this->periods))) {
+        if (in_array($period, $this->periods)) {
             $this->keys->visits = $this->keys->period($period);
         }
 

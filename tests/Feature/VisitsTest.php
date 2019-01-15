@@ -35,6 +35,30 @@ class VisitsTest extends TestCase
     }
 
     /** @test * */
+    public function x_hours_periods()
+    {
+        config()->set('visits.periods', ['3hours']);
+
+        Carbon::setTestNow(Carbon::now()->endOfxHours(3));
+
+        $userA = Post::create()->fresh();
+
+        visits($userA)->increment();
+
+        $this->assertEquals([1, 1], [
+            visits($userA)->count(),
+            visits($userA)->period('3hours')->count(),
+        ]);
+
+        sleep(1);
+
+        $this->assertEquals([1, 0,], [
+            visits($userA)->count(),
+            visits($userA)->period('3hours')->count(),
+        ]);
+    }
+
+    /** @test * */
     public function by_can_accept_array()
     {
         User::create();
@@ -81,17 +105,6 @@ class VisitsTest extends TestCase
         $this->assertEquals(0, visits($post)->count());
     }
 
-    /** @test * */
-    public function belongs_to_relation_test()
-    {
-        $user = User::create();
-        $post = $user->posts()->create();
-
-        visits($post)->creator->increment();
-
-        $this->assertEquals(1, visits($post)->creator->count());
-        $this->assertEquals(0, visits($post)->count());
-    }
 
     /** @test * */
     public function laravel_visits_is_the_default_connection()

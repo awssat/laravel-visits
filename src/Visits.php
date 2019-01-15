@@ -72,32 +72,15 @@ class Visits
     }
 
     /**
-     * @param $attribute
-     * @return $this
-     */
-    public function __get($attribute)
-    {
-        if($this->keys->instanceOfModel && $relation = $this->subject->$attribute) {
-            $this->keys->append($attribute, $relation->{$relation->getKeyName()});
-        }
-
-        return $this;
-    }
-
-    /**
      * @param $subject
      * @return $this
      */
     public function by($subject)
     {
         if($subject instanceof Model) {
-            $this->keys->append(strtolower(str_singular(class_basename(get_class($subject)))),
-                $subject->{$subject->getKeyName()});
+            $this->keys->append($this->keys->modelName($subject), $subject->{$subject->getKeyName()});
         } else if (is_array($subject)) {
-            $subject = collect($subject);
-            $this->keys->append($subject->flip()->first(), $subject->first());
-        } else {
-            $this->keys->append('custom', $subject);
+            $this->keys->append(array_keys($subject)[0], array_first($subject));
         }
 
         return $this;
