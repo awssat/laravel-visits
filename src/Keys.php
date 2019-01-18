@@ -47,6 +47,16 @@ class Keys
     }
 
     /**
+     * Get cache key
+     *
+     * @return string
+     */
+    public function visitsTotal()
+    {
+        return "{$this->visits}_total";
+    }
+
+    /**
      * @param $ip
      * @return string
      */

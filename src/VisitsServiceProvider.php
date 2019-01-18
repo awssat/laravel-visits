@@ -24,7 +24,7 @@ class VisitsServiceProvider extends ServiceProvider
                 throw new \Exception('12 is the maximum period in xHours feature');
             }
 
-            $hour = collect(range(1, 24 / $xhours))
+            $hour = collect(range(1, 23 / $xhours))
                 ->map(function ($hour) use ($xhours) {
                     return $hour * $xhours;
                 })->first(function ($hour) {

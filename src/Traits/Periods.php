@@ -49,7 +49,7 @@ trait Periods
                 ' please update your visits.php config');
         }
 
-        return ($periodCarbon->timestamp - Carbon::now()->timestamp) + 1;
+        return $periodCarbon->diffInSeconds() + 1;
     }
 
     /**

@@ -3,10 +3,8 @@
 namespace awssat\Visits\Tests\Feature;
 
 use awssat\Visits\Tests\TestCase;
-use Carbon\Carbon;
 use awssat\Visits\Tests\Post;
 use awssat\Visits\Tests\User;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 
@@ -19,43 +17,6 @@ class VisitsTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-
-        $this->app['config']['database.redis.laravel-visits'] = [
-                'host' => env('REDIS_HOST', 'localhost'),
-                'password' => env('REDIS_PASSWORD', null),
-                'port' => env('REDIS_PORT', 6379),
-                'database' => 3,
-       ];
-
-        $this->redis = Redis::connection('laravel-visits');
-
-        if (count($cc = $this->redis->keys('visits:testing:*'))) {
-            $this->redis->del($cc);
-        }
-    }
-
-    /** @test * */
-    public function x_hours_periods()
-    {
-        config()->set('visits.periods', ['3hours']);
-
-        Carbon::setTestNow(Carbon::now()->endOfxHours(3));
-
-        $userA = Post::create()->fresh();
-
-        visits($userA)->increment();
-
-        $this->assertEquals([1, 1], [
-            visits($userA)->count(),
-            visits($userA)->period('3hours')->count(),
-        ]);
-
-        sleep(1);
-
-        $this->assertEquals([1, 0,], [
-            visits($userA)->count(),
-            visits($userA)->period('3hours')->count(),
-        ]);
     }
 
     /** @test * */
@@ -140,51 +101,6 @@ class VisitsTest extends TestCase
 
         $this->assertEquals([1, 1,], [ visits($userA)->count(), visits($userA, 'clicks')->count() ]);
     }
-
-    /** @test */
-    public function periods_test()
-    {
-        //somone add something on end of the week
-        Carbon::setTestNow(Carbon::now()->endOfWeek());
-
-        $userA = Post::create()->fresh();
-
-        visits($userA)->increment();
-
-        //it should be there fo breif of time
-        $this->assertEquals([1, 1, 1, 1, 1], [
-            visits($userA)->count(),
-            visits($userA)->period('day')->count(),
-            visits($userA)->period('week')->count(),
-            visits($userA)->period('month')->count(),
-            visits($userA)->period('year')->count()
-        ]);
-
-        //after seconds it should be empty for week and day
-        sleep(1);
-        $this->assertEquals([1, 0, 0, 1, 1], [
-            visits($userA)->count(),
-            visits($userA)->period('day')->count(),
-            visits($userA)->period('week')->count(),
-            visits($userA)->period('month')->count(),
-            visits($userA)->period('year')->count()
-        ]);
-
-        //he came after a 5 minute later
-        Carbon::setTestNow(Carbon::now()->endOfWeek()->addHours(1));
-
-        sleep(1);
-        visits($userA)->forceIncrement();
-
-        $this->assertEquals([2, 1, 1, 2, 2], [
-            visits($userA)->count(),
-            visits($userA)->period('day')->count(),
-            visits($userA)->period('week')->count(),
-            visits($userA)->period('month')->count(),
-            visits($userA)->period('year')->count()
-        ]);
-    }
-
 
     /** @test */
     public function referer_test()
@@ -419,7 +335,7 @@ class VisitsTest extends TestCase
 
         visits($post)->seconds(1)->increment();
 
-        sleep(visits($post)->timeLeft()->diffInSeconds() + 1);
+        sleep(visits($post)->ipTimeLeft()->diffInSeconds() + 1);
 
         visits($post)->increment();
 

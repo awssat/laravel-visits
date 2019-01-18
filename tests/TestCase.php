@@ -10,6 +10,7 @@ use Spatie\Referer\Referer;
 use Spatie\Referer\CaptureReferer;
 use Spatie\Referer\RefererServiceProvider;
 use Torann\GeoIP\GeoIPServiceProvider;
+use Illuminate\Support\Facades\Redis;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -17,6 +18,8 @@ abstract class TestCase extends BaseTestCase
     protected $session;
     /** @var \Spatie\Referer\Referer */
     protected $referer;
+
+    protected $redis;
 
     /**
      * Setup the test environment.
@@ -35,6 +38,19 @@ abstract class TestCase extends BaseTestCase
         $this->referer = $this->app['referer'];
 
         $this->runTestMigrations();
+
+        $this->app['config']['database.redis.laravel-visits'] = [
+            'host' => env('REDIS_HOST', 'localhost'),
+            'password' => env('REDIS_PASSWORD', null),
+            'port' => env('REDIS_PORT', 6379),
+            'database' => 3,
+        ];
+
+        $this->redis = Redis::connection('laravel-visits');
+
+        if (count($cc = $this->redis->keys('visits:testing:*'))) {
+            $this->redis->del($cc);
+        }
     }
 
 

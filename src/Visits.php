@@ -124,22 +124,28 @@ class Visits
         }
 
         return intval(
-            (!$this->keys->instanceOfModel) ?
-                $this->redis->get($this->keys->visits . '_total') :
-                $this->redis->zscore($this->keys->visits, $this->keys->id)
+            $this->keys->instanceOfModel ?
+                $this->redis->zscore($this->keys->visits, $this->keys->id) :
+                $this->redis->get($this->keys->visitsTotal())
         );
     }
 
     /**
      * use diffForHumans to show diff
-     * @param $period
      * @return Carbon
      */
-    public function timeLeft($period = false)
+    public function timeLeft()
     {
-        return Carbon::now()->addSeconds($this->redis->ttl(
-            $period ? $this->keys->period($period) : $this->keys->ip(request()->ip())
-        ));
+        return Carbon::now()->addSeconds($this->redis->ttl($this->keys->visits));
+    }
+
+    /**
+     * use diffForHumans to show diff
+     * @return Carbon
+     */
+    public function ipTimeLeft()
+    {
+        return Carbon::now()->addSeconds($this->redis->ttl($this->keys->ip(request()->ip())));
     }
 
     protected function isCrawler()
@@ -160,7 +166,7 @@ class Visits
     {
         if ($force OR !$this->isCrawler() && !$this->recordedIp()) {
             $this->redis->zincrby($this->keys->visits, $inc, $this->keys->id);
-            $this->redis->incrby($this->keys->visits . '_total', $inc);
+            $this->redis->incrby($this->keys->visitsTotal(), $inc);
 
             //NOTE: $method is parameter also .. ($periods,$country,$refer)
             foreach (['country', 'refer', 'periods'] as $method) {
