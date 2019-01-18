@@ -341,8 +341,21 @@ class VisitsTest extends TestCase
 
         $this->assertEquals(2, visits($post)->count());
     }
+    
+    /**
+     * @test
+     */
+    public function n_minus_1_bug()
+    {
+        foreach (range(1, 6) as $i) {
+            $post = Post::create(['name' => $i])->fresh();
+            visits($post)->forceIncrement();
+        }
 
+        $list = visits('awssat\Visits\Tests\Post')->top(5)->pluck('name');
 
+        $this->assertEquals(5, $list->count());
+    }
 
     /**
      * @test
