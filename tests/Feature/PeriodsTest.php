@@ -3,7 +3,7 @@
 namespace awssat\Visits\Tests\Feature;
 
 use awssat\Visits\Tests\TestCase;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use awssat\Visits\Tests\Post;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 

@@ -2,7 +2,7 @@
 
 namespace awssat\Visits\Traits;
 
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Exception;
 
 trait Periods

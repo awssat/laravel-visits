@@ -6,7 +6,7 @@ use awssat\Visits\Traits\Lists;
 use awssat\Visits\Traits\Periods;
 use awssat\Visits\Traits\Record;
 use awssat\Visits\Traits\Setters;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Redis;
 use Jaybizzle\CrawlerDetect\CrawlerDetect;
