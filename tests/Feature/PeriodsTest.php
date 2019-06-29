@@ -100,7 +100,7 @@ class PeriodsTest extends TestCase
     public function all_periods()
     {
         //somone add something on end of the week
-        Carbon::setTestNow(Carbon::now()->endOfWeek());
+        Carbon::setTestNow(Carbon::now()->startOfMonth()->endOfWeek());
 
         $post = Post::create()->fresh();
 
@@ -144,7 +144,7 @@ class PeriodsTest extends TestCase
     public function total_periods()
     {
         //somone add something on end of the week
-        Carbon::setTestNow(Carbon::now()->endOfWeek());
+        Carbon::setTestNow(Carbon::now()->startOfMonth()->endOfWeek());
 
         $post = Post::create()->fresh();
 
