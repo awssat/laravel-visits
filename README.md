@@ -41,8 +41,6 @@ Laravel Visits is a counter that can be attached to any model to track its visit
 - Get most visited countries ...
 - Get visits per a period of time like a month of a year of an item or model.
 
-
-
 ## Install
 
 Via Composer
@@ -290,6 +288,9 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) and [CODE_OF_CONDUCT](CODE_OF_CONDUCT
 - [Bader][link-author]
 - [All Contributors][link-contributors]
 
+## Todo
+- An export command to save visits of any periods to a table on database.
+ 
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
