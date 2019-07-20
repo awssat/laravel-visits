@@ -28,13 +28,18 @@ class Visits
      */
     protected $fresh = false;
     /**
-     * @var null
+     * @var null|string
      */
     protected $country = null;
     /**
-     * @var null
+     * @var null|string
      */
     protected $referer = null;
+
+    /**
+     * @var null|string
+     */
+    protected $operatingSystem = null;
     /**
      * @var mixed
      */
@@ -121,6 +126,8 @@ class Visits
             return $this->redis->zscore($this->keys->visits . "_countries:{$this->keys->id}", $this->country);
         } else if ($this->referer) {
             return $this->redis->zscore($this->keys->visits . "_referers:{$this->keys->id}", $this->referer);
+        } else if ($this->operatingSystem) {
+            return $this->redis->zscore($this->keys->visits . "_OSes:{$this->keys->id}", $this->operatingSystem);
         }
 
         return intval(
@@ -159,49 +166,52 @@ class Visits
      * @param int $inc
      * @param bool $force
      * @param bool $periods
-     * @param bool $country
+     * @param array $ignore to ignore recording visits of periods, country, refer and operatingSystem. pass them on this array.
      * @param bool $refer
+     * @param bool $operatingSystem
      */
-    public function increment($inc = 1, $force = false, $periods = true, $country = true, $refer = true)
+    public function increment($inc = 1, $force = false, $ignore = [])
     {
-        if ($force OR !$this->isCrawler() && !$this->recordedIp()) {
+        if ($force || (!$this->isCrawler() && !$this->recordedIp())) {
             $this->redis->zincrby($this->keys->visits, $inc, $this->keys->id);
             $this->redis->incrby($this->keys->visitsTotal(), $inc);
 
-            //NOTE: $method is parameter also .. ($periods,$country,$refer)
-            foreach (['country', 'refer', 'periods'] as $method) {
-                $$method && $this->{'record' . studly_case($method)}($inc);
+            //NOTE: $$method is parameter also .. ($periods,$country,$refer)
+            foreach (['country', 'refer', 'periods', 'operatingSystem'] as $method) {
+                if(! in_array($method, $ignore))  {
+                    $this->{'record'.studly_case($method)}($inc);
+                }
             }
         }
     }
 
     /**
      * @param int $inc
-     * @param bool $periods
+     * @param array $ignore to ignore recording visits like country, periods ...
      */
-    public function forceIncrement($inc = 1, $periods = true)
+    public function forceIncrement($inc = 1, $ignore = [])
     {
-        $this->increment($inc, true, $periods);
+        $this->increment($inc, true, $ignore);
     }
 
     /**
      * Decrement a new/old subject to the cache cache.
      *
      * @param int $dec
-     * @param bool $force
+     * @param array $ignore to ignore recording visits like country, periods ...
      */
-    public function decrement($dec = 1, $force = false)
+    public function decrement($dec = 1, $force = false, $ignore = [])
     {
-        $this->increment(-$dec, $force);
+        $this->increment(-$dec, $force, $ignore);
     }
 
     /**
      * @param int $dec
-     * @param bool $periods
+     * @param array $ignore to ignore recording visits like country, periods ...
      */
-    public function forceDecrement($dec = 1, $periods = true)
+    public function forceDecrement($dec = 1, $ignore = [])
     {
-        $this->increment(-$dec, true, $periods);
+        $this->decrement($dec, true, $ignore);
     }
 
     /**

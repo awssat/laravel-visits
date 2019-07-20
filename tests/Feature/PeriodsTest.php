@@ -24,7 +24,9 @@ class PeriodsTest extends TestCase
     {
         config()->set('visits.periods', ['3hours']);
 
-        Carbon::setTestNow( Carbon::now()->endOfxHours(3) );
+        Carbon::setTestNow( 
+            Carbon::now()->endOfxHours(3) 
+        );
 
         $post = Post::create()->fresh();
 

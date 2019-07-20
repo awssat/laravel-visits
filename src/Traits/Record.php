@@ -11,7 +11,7 @@ trait Record
      */
     protected function recordCountry($inc)
     {
-        $this->redis->zincrby($this->keys->visits . "_countries:{$this->keys->id}", $inc, $this->getVisitorCountry());
+        $this->redis->zincrby($this->keys->visits."_countries:{$this->keys->id}", $inc, $this->getVisitorCountry());
     }
 
     /**
@@ -20,7 +20,15 @@ trait Record
     protected function recordRefer($inc)
     {
         $referer = app(Referer::class)->get();
-        $this->redis->zincrby($this->keys->visits . "_referers:{$this->keys->id}", $inc, $referer);
+        $this->redis->zincrby($this->keys->visits."_referers:{$this->keys->id}", $inc, $referer);
+    }
+
+    /**
+     * @param $inc
+     */
+    protected function recordOperatingSystem($inc)
+    {
+        $this->redis->zincrby($this->keys->visits."_OSes:{$this->keys->id}", $inc, $this->getVisitorOperatingSystem());
     }
 
     /**
@@ -32,7 +40,7 @@ trait Record
             $periodKey = $this->keys->period($period);
 
             $this->redis->zincrby($periodKey, $inc, $this->keys->id);
-            $this->redis->incrby($periodKey . '_total', $inc);
+            $this->redis->incrby($periodKey.'_total', $inc);
         }
     }
 
@@ -43,5 +51,30 @@ trait Record
     protected function getVisitorCountry()
     {
         return strtolower(geoip()->getLocation()->iso_code);
+    }
+
+    /**
+     *  Gets visitor operating system
+     * @return mixed|string
+     */
+    public function getVisitorOperatingSystem()
+    {
+        $osArray = [
+        '/windows|win32|win16|win95/i' => 'Windows',
+        '/iphone/i' => 'iPhone',
+        '/ipad/i' => 'iPad',
+        '/macintosh|mac os x|mac_powerpc/i' => 'MacOS',
+        '/android/i' => 'Android',
+        '/blackberry/i' => 'BlackBerry',
+        '/linux/i' => 'Linux',
+        ];
+
+        foreach ($osArray as $regex => $value) {
+            if (preg_match($regex, request()->server('HTTP_USER_AGENT') ?? '')) {
+                return $value;
+            }
+        }
+
+        return 'unknown';
     }
 }

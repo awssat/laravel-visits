@@ -2,11 +2,10 @@
 
 namespace awssat\Visits\Tests\Feature;
 
-use awssat\Visits\Tests\TestCase;
 use awssat\Visits\Tests\Post;
 use awssat\Visits\Tests\User;
+use awssat\Visits\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-
 
 class VisitsTest extends TestCase
 {
@@ -66,7 +65,6 @@ class VisitsTest extends TestCase
         $this->assertEquals(0, visits($post)->count());
     }
 
-
     /** @test * */
     public function laravel_visits_is_the_default_connection()
     {
@@ -99,7 +97,7 @@ class VisitsTest extends TestCase
 
         visits($userA, 'clicks')->increment();
 
-        $this->assertEquals([1, 1,], [ visits($userA)->count(), visits($userA, 'clicks')->count() ]);
+        $this->assertEquals([1, 1, ], [visits($userA)->count(), visits($userA, 'clicks')->count()]);
     }
 
     /** @test */
@@ -115,7 +113,28 @@ class VisitsTest extends TestCase
 
         visits($Post)->forceIncrement(10);
 
-        $this->assertEquals(['twitter.com' => 10, 'google.com' => 1,], visits($Post)->refs());
+        $this->assertEquals(['twitter.com' => 10, 'google.com' => 1, ], visits($Post)->refs());
+    }
+
+    /** @test */
+    public function operating_system_test()
+    {
+        $Post = Post::create()->fresh();
+
+        request()->server->replace([
+            'HTTP_USER_AGENT' => 'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
+        ]);
+
+
+        visits($Post)->forceIncrement();
+
+        request()->server->replace([
+            'HTTP_USER_AGENT' => 'Mozilla/5.0 (Linux; Android 6.0.1; SAMSUNG SM-N920T Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/4.0 Chrome/44.0.2403.133 Mobile Safari/537.36'
+        ]);
+
+        visits($Post)->forceIncrement(10);
+
+        $this->assertEquals(['Android' => 10, 'iPad' => 1], visits($Post)->operatingSystems());
     }
 
     /** @test */
@@ -173,7 +192,6 @@ class VisitsTest extends TestCase
             [2, 3],
             visits('awssat\Visits\Tests\Post')->top(5)->pluck('id')->toArray()
         );
-
     }
 
     /** @test */
@@ -189,10 +207,10 @@ class VisitsTest extends TestCase
             '129.0.0.2',
             '124.0.0.2'
         ];
-        $key = "visits:testing:posts_visits_recorded_ips:1:";
+        $key = 'visits:testing:posts_visits_recorded_ips:1:';
 
         foreach ($ips as $ip) {
-            $this->redis->set( $key . $ip, true, 'EX', 15 * 60, 'NX');
+            $this->redis->set($key.$ip, true, 'EX', 15 * 60, 'NX');
         }
 
         visits($post)->increment(10);
@@ -204,8 +222,7 @@ class VisitsTest extends TestCase
 
         visits($post)->reset('ips', '127.0.0.1');
 
-
-        $ips_in_redis = collect($this->redis->keys(config('visits.redis_keys_prefix') . ":testing:posts_visits_recorded_ips:*"))->map(function ($ip) use ($key) {
+        $ips_in_redis = collect($this->redis->keys(config('visits.redis_keys_prefix').':testing:posts_visits_recorded_ips:*'))->map(function ($ip) use ($key) {
             return str_replace($key, '', $ip);
         });
 
@@ -220,7 +237,6 @@ class VisitsTest extends TestCase
             20,
             visits($post)->count()
         );
-
     }
 
     /** @test */
@@ -231,18 +247,17 @@ class VisitsTest extends TestCase
 
         //increase
         foreach (range(1, 20) as $id) {
-
             $post = Post::create()->fresh();
 
-            while($inc = rand(1, 200)) {
-                if(!in_array($inc, $unique)) {
+            while ($inc = rand(1, 200)) {
+                if (! in_array($inc, $unique)) {
                     $unique[] = $inc;
                     break;
                 }
             }
 
-            visits($post)->period('day')->forceIncrement($inc, false);
-            visits($post)->forceIncrement($inc, false);
+            visits($post)->period('day')->forceIncrement($inc, ['periods']);
+            visits($post)->forceIncrement($inc, ['periods']);
 
             $arr[$id] = visits($post)->period('day')->count();
         }
@@ -257,10 +272,10 @@ class VisitsTest extends TestCase
             visits('awssat\Visits\Tests\Post')->period('day')->low(11)->pluck('id')->toArray()
         );
 
-
         visits('awssat\Visits\Tests\Post')->period('day')->reset();
 
-        $this->assertEquals(0,
+        $this->assertEquals(
+            0,
             visits('awssat\Visits\Tests\Post')->period('day')->count()
         );
 
@@ -276,7 +291,6 @@ class VisitsTest extends TestCase
             collect($arr)->sum(),
             visits('awssat\Visits\Tests\Post')->count()
         );
-
     }
 
     /** @test */
@@ -307,24 +321,25 @@ class VisitsTest extends TestCase
     {
         $post = Post::create()->fresh();
 
-        $this->assertEquals(0,
+        $this->assertEquals(
+            0,
             visits($post)->count()
         );
 
         visits($post)->increment();
 
-        $this->assertEquals(1,
+        $this->assertEquals(
+            1,
             visits($post)->count()
         );
 
         visits($post)->forceDecrement();
 
-        $this->assertEquals(0,
+        $this->assertEquals(
+            0,
             visits($post)->count()
         );
-
     }
-
 
     /**
      * @test
@@ -341,7 +356,7 @@ class VisitsTest extends TestCase
 
         $this->assertEquals(2, visits($post)->count());
     }
-    
+
     /**
      * @test
      */

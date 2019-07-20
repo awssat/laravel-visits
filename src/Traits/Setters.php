@@ -52,6 +52,17 @@ trait Setters
         return $this;
     }
 
+    /**
+     * @param $operatingSystem
+     * @return $this
+     */
+    public function operatingSystem($operatingSystem)
+    {
+        $this->operatingSystem = $operatingSystem;
+
+        return $this;
+    }
+
 
     /**
      * Change period

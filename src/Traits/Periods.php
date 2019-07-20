@@ -42,11 +42,9 @@ trait Periods
     protected function newExpiration($period)
     {
         try {
-            $periodCarbon = $this->xHoursPeriod($period) ??
-                Carbon::now()->{'endOf' . studly_case($period)}();
-        } catch (Exception $exception) {
-            throw new Exception('Wrong period : ' . $period .
-                ' please update your visits.php config');
+            $periodCarbon = $this->xHoursPeriod($period) ?? Carbon::now()->{'endOf' . studly_case($period)}();
+        } catch (Exception $e) {
+            throw new Exception("Wrong period: `{$period}`! please update config/visits.php file.");
         }
 
         return $periodCarbon->diffInSeconds() + 1;
@@ -58,13 +56,9 @@ trait Periods
      */
     protected function xHoursPeriod($period)
     {
-        return collect(range(1, 12))->map(function ($hour) {
-                return ['method' => $hour . 'hours', 'hours' => $hour];
-            })->where('method', $period)
-            ->pluck('hours')
-            ->map(function ($hours) {
-                return Carbon::now()->endOfxHours($hours);
-            })
-            ->first();
+        preg_match('/([\d]+)\s?([\w]+)/', $period, $match);
+        return isset($match[2]) && isset($match[1]) && $match[2] == 'hours' && $match[1] < 12
+                ? Carbon::now()->endOfxHours((int) $match[1]) 
+                : null;
     }
 }

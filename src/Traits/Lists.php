@@ -54,6 +54,20 @@ trait Lists
     }
 
     /**
+     * top/lows operating systems
+     *
+     * @param int $limit
+     * @param bool $isLow
+     * @return mixed
+     */
+    public function operatingSystems($limit = -1, $isLow = false)
+    {
+        $range = $isLow ? 'zrange' : 'zrevrange';
+
+        return $this->redis->$range($this->keys->visits . "_OSes:{$this->keys->id}", 0, $limit, 'WITHSCORES');
+    }
+
+    /**
      * Fetch lowest subjects.
      *
      * @param int $limit
