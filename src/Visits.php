@@ -35,11 +35,14 @@ class Visits
      * @var null|string
      */
     protected $referer = null;
-
     /**
      * @var null|string
      */
     protected $operatingSystem = null;
+    /**
+     * @var null|string
+     */
+    protected $language = null;
     /**
      * @var mixed
      */
@@ -128,6 +131,8 @@ class Visits
             return $this->redis->zscore($this->keys->visits . "_referers:{$this->keys->id}", $this->referer);
         } else if ($this->operatingSystem) {
             return $this->redis->zscore($this->keys->visits . "_OSes:{$this->keys->id}", $this->operatingSystem);
+        } else if ($this->language) {
+            return $this->redis->zscore($this->keys->visits . "_languages:{$this->keys->id}", $this->language);
         }
 
         return intval(
@@ -166,7 +171,7 @@ class Visits
      * @param int $inc
      * @param bool $force
      * @param bool $periods
-     * @param array $ignore to ignore recording visits of periods, country, refer and operatingSystem. pass them on this array.
+     * @param array $ignore to ignore recording visits of periods, country, refer, language and operatingSystem. pass them on this array.
      * @param bool $refer
      * @param bool $operatingSystem
      */
@@ -177,7 +182,7 @@ class Visits
             $this->redis->incrby($this->keys->visitsTotal(), $inc);
 
             //NOTE: $$method is parameter also .. ($periods,$country,$refer)
-            foreach (['country', 'refer', 'periods', 'operatingSystem'] as $method) {
+            foreach (['country', 'refer', 'periods', 'operatingSystem', 'language'] as $method) {
                 if(! in_array($method, $ignore))  {
                     $this->{'record'.studly_case($method)}($inc);
                 }

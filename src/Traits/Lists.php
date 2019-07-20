@@ -68,6 +68,20 @@ trait Lists
     }
 
     /**
+     * top/lows languages
+     *
+     * @param int $limit
+     * @param bool $isLow
+     * @return mixed
+     */
+    public function languages($limit = -1, $isLow = false)
+    {
+        $range = $isLow ? 'zrange' : 'zrevrange';
+
+        return $this->redis->$range($this->keys->visits . "_languages:{$this->keys->id}", 0, $limit, 'WITHSCORES');
+    }
+
+    /**
      * Fetch lowest subjects.
      *
      * @param int $limit

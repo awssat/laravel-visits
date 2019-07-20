@@ -34,6 +34,14 @@ trait Record
     /**
      * @param $inc
      */
+    protected function recordLanguage($inc)
+    {
+        $this->redis->zincrby($this->keys->visits."_languages:{$this->keys->id}", $inc, $this->getVisitorLanguage());
+    }
+
+    /**
+     * @param $inc
+     */
     protected function recordPeriods($inc)
     {
         foreach ($this->periods as $period) {
@@ -76,5 +84,15 @@ trait Record
         }
 
         return 'unknown';
+    }
+
+    /**
+     *  Gets visitor language
+     * @return mixed|string
+     */
+    public function getVisitorLanguage()
+    {
+
+        return request()->getPreferredLanguage();
     }
 }

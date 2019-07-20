@@ -138,6 +138,20 @@ class VisitsTest extends TestCase
     }
 
     /** @test */
+    public function language_test()
+    {
+        $Post = Post::create()->fresh();
+
+        request()->headers->replace([
+            'Accept-Language' => 'ar'
+        ]);
+
+        visits($Post)->forceIncrement();
+
+        $this->assertEquals(['ar' => 1], visits($Post)->languages());
+    }
+
+    /** @test */
     public function store_country_aswell()
     {
         $Post = Post::create()->fresh();

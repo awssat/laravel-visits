@@ -63,6 +63,16 @@ trait Setters
         return $this;
     }
 
+    /**
+     * @param $language
+     * @return $this
+     */
+    public function language($language)
+    {
+        $this->language = $language;
+
+        return $this;
+    }
 
     /**
      * Change period
