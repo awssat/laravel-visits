@@ -15,23 +15,20 @@ class VisitsServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__ . '/config/visits.php' => config_path('visits.php'),
+            __DIR__.'/config/visits.php' => config_path('visits.php'),
         ], 'config');
 
         Carbon::macro('endOfxHours', function ($xhours) {
-
-            if($xhours > 12) {
+            if ($xhours > 12) {
                 throw new \Exception('12 is the maximum period in xHours feature');
             }
+            $h = $this->hour;
 
-            $hour = collect(range(1, 23 / $xhours))
-                ->map(function ($hour) use ($xhours) {
-                    return $hour * $xhours;
-                })->first(function ($hour) {
-                    return $hour >= $this->hour;
-                });
-
-            return $this->setTime($hour , 59, 59);
+            return $this->setTime(
+                ($h % $xhours == 0 ? 'min' : 'max')($h - ($h % $xhours), $h - ($h % $xhours) + $xhours),
+                59,
+                59
+            );
         });
     }
 
@@ -43,7 +40,8 @@ class VisitsServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/config/visits.php', 'visits'
+            __DIR__.'/config/visits.php',
+            'visits'
         );
     }
 }

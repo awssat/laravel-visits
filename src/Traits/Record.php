@@ -72,6 +72,8 @@ trait Record
         '/iphone/i' => 'iPhone',
         '/ipad/i' => 'iPad',
         '/macintosh|mac os x|mac_powerpc/i' => 'MacOS',
+        '/(?=.*mobile)android/i' => 'AndroidMobile',
+        '/(?!.*mobile)android/i' => 'AndroidTablet',
         '/android/i' => 'Android',
         '/blackberry/i' => 'BlackBerry',
         '/linux/i' => 'Linux',

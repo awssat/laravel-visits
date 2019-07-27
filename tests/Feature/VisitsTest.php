@@ -134,7 +134,7 @@ class VisitsTest extends TestCase
 
         visits($Post)->forceIncrement(10);
 
-        $this->assertEquals(['Android' => 10, 'iPad' => 1], visits($Post)->operatingSystems());
+        $this->assertEquals(['AndroidMobile' => 10, 'iPad' => 1], visits($Post)->operatingSystems());
     }
 
     /** @test */
