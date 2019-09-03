@@ -6,6 +6,7 @@ use awssat\Visits\Tests\Post;
 use awssat\Visits\Tests\User;
 use awssat\Visits\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 
 class VisitsTest extends TestCase
 {
@@ -236,7 +237,7 @@ class VisitsTest extends TestCase
 
         visits($post)->reset('ips', '127.0.0.1');
 
-        $ips_in_redis = collect($this->redis->keys(config('visits.redis_keys_prefix').':testing:posts_visits_recorded_ips:*'))->map(function ($ip) use ($key) {
+        $ips_in_redis = Collection::make($this->redis->keys(config('visits.redis_keys_prefix').':testing:posts_visits_recorded_ips:*'))->map(function ($ip) use ($key) {
             return str_replace($key, '', $ip);
         });
 
@@ -277,12 +278,12 @@ class VisitsTest extends TestCase
         }
 
         $this->assertEquals(
-            collect($arr)->sort()->reverse()->keys()->take(10)->toArray(),
+            Collection::make($arr)->sort()->reverse()->keys()->take(10)->toArray(),
             visits('awssat\Visits\Tests\Post')->period('day')->top(10)->pluck('id')->toArray()
         );
 
         $this->assertEquals(
-            collect($arr)->sort()->keys()->take(10)->toArray(),
+            Collection::make($arr)->sort()->keys()->take(10)->toArray(),
             visits('awssat\Visits\Tests\Post')->period('day')->low(11)->pluck('id')->toArray()
         );
 
@@ -302,7 +303,7 @@ class VisitsTest extends TestCase
         );
 
         $this->assertEquals(
-            collect($arr)->sum(),
+            Collection::make($arr)->sum(),
             visits('awssat\Visits\Tests\Post')->count()
         );
     }

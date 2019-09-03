@@ -8,6 +8,7 @@ use awssat\Visits\Traits\Record;
 use awssat\Visits\Traits\Setters;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Redis;
 use Jaybizzle\CrawlerDetect\CrawlerDetect;
 
@@ -88,7 +89,7 @@ class Visits
         if($subject instanceof Model) {
             $this->keys->append($this->keys->modelName($subject), $subject->{$subject->getKeyName()});
         } else if (is_array($subject)) {
-            $this->keys->append(array_keys($subject)[0], array_first($subject));
+            $this->keys->append(array_keys($subject)[0], Arr::first($subject));
         }
 
         return $this;

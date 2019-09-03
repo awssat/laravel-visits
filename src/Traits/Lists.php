@@ -2,6 +2,8 @@
 
 namespace awssat\Visits\Traits;
 
+use Illuminate\Support\Collection;
+
 trait Lists
 {
     /**
@@ -135,7 +137,7 @@ trait Lists
      */
     protected function cachedList($limit, $cacheKey)
     {
-        return collect(
+        return Collection::make(
             array_map('unserialize', $this->redis->lrange($cacheKey, 0, $limit - 1))
         );
     }
