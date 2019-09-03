@@ -39,6 +39,8 @@ class Reset extends Visits
         $this->lists();
         $this->allcountries();
         $this->allrefs();
+        $this->allOperatingSystems();
+        $this->allLanguages();
     }
 
     /**
@@ -50,8 +52,10 @@ class Reset extends Visits
             $this->redis->zrem($this->keys->visits, $this->keys->id);
             $this->redis->del($this->keys->visits . "_countries:{$this->keys->id}");
             $this->redis->del($this->keys->visits . "_referers:{$this->keys->id}");
+            $this->redis->del($this->keys->visits . "_OSes:{$this->keys->id}");
+            $this->redis->del($this->keys->visits . "_languages:{$this->keys->id}");
 
-            foreach ($this->periods as $period => $days) {
+            foreach ($this->periods as $period => $_) {
                 $this->redis->zrem($this->keys->period($period), $this->keys->id);
             }
 
@@ -72,6 +76,23 @@ class Reset extends Visits
         }
     }
 
+    public function allOperatingSystems()
+    {
+        $cc = $this->redis->keys($this->keys->visits . '_OSes:*');
+
+        if (count($cc)) {
+            $this->redis->del($cc);
+        }
+    }
+
+    public function allLanguages()
+    {
+        $cc = $this->redis->keys($this->keys->visits . '_languages:*');
+
+        if (count($cc)) {
+            $this->redis->del($cc);
+        }
+    }
 
     public function allcountries()
     {

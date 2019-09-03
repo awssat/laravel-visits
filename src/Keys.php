@@ -3,6 +3,7 @@
 namespace awssat\Visits;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Keys
 {
@@ -107,7 +108,7 @@ class Keys
      */
     public function modelName($subject)
     {
-        return strtolower(str_singular(class_basename(get_class($subject))));
+        return strtolower(Str::singular(class_basename(get_class($subject))));
     }
 
     /**
@@ -116,6 +117,6 @@ class Keys
      */
     public function pluralModelName($subject)
     {
-        return strtolower(str_plural(class_basename(is_string($subject) ? $subject : get_class($subject))));
+        return strtolower(Str::plural(class_basename(is_string($subject) ? $subject : get_class($subject))));
     }
 }

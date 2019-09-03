@@ -2,6 +2,8 @@
 
 namespace awssat\Visits\Traits;
 
+use Illuminate\Support\Collection;
+
 trait Lists
 {
     /**
@@ -51,6 +53,34 @@ trait Lists
         $range = $isLow ? 'zrange' : 'zrevrange';
 
         return $this->redis->$range($this->keys->visits . "_referers:{$this->keys->id}", 0, $limit, 'WITHSCORES');
+    }
+
+    /**
+     * top/lows operating systems
+     *
+     * @param int $limit
+     * @param bool $isLow
+     * @return mixed
+     */
+    public function operatingSystems($limit = -1, $isLow = false)
+    {
+        $range = $isLow ? 'zrange' : 'zrevrange';
+
+        return $this->redis->$range($this->keys->visits . "_OSes:{$this->keys->id}", 0, $limit, 'WITHSCORES');
+    }
+
+    /**
+     * top/lows languages
+     *
+     * @param int $limit
+     * @param bool $isLow
+     * @return mixed
+     */
+    public function languages($limit = -1, $isLow = false)
+    {
+        $range = $isLow ? 'zrange' : 'zrevrange';
+
+        return $this->redis->$range($this->keys->visits . "_languages:{$this->keys->id}", 0, $limit, 'WITHSCORES');
     }
 
     /**
@@ -107,7 +137,7 @@ trait Lists
      */
     protected function cachedList($limit, $cacheKey)
     {
-        return collect(
+        return Collection::make(
             array_map('unserialize', $this->redis->lrange($cacheKey, 0, $limit - 1))
         );
     }

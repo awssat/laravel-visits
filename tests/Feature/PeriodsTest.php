@@ -24,7 +24,9 @@ class PeriodsTest extends TestCase
     {
         config()->set('visits.periods', ['3hours']);
 
-        Carbon::setTestNow( Carbon::now()->endOfxHours(3) );
+        Carbon::setTestNow( 
+            Carbon::now()->endOfxHours(3) 
+        );
 
         $post = Post::create()->fresh();
 
@@ -37,7 +39,7 @@ class PeriodsTest extends TestCase
 
         sleep(1);
 
-        $this->assertEquals([1, 0,], [
+        $this->assertEquals([1, 0], [
             visits($post)->count(),
             visits($post)->period('3hours')->count(),
         ]);
