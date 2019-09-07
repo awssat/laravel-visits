@@ -42,29 +42,22 @@ Laravel Visits is a counter that can be attached to any model to track its visit
 - Get visits per a period of time like a month of a year of an item or model.
 
 ## Install
-
 Via Composer
 ``` bash
 composer require awssat/laravel-visits
 ```
 #### Requirement
+- Laravel 5.5+
+- PHP 7.1+
 - This package rely on heavly on Redis. To use it, make sure that Redis is configured and ready. (see [Laravel Redis Configuration](https://laravel.com/docs/5.6/redis#configuration))
 
 
-#### Before Laravel 5.5
-In Laravel 5.4. you'll manually need to register the `awssat\Visits\VisitsServiceProvider::class` service provider in `config/app.php`.
 
 #### Config
 To adjust the library, you can publish the config file to your project using:
 ```
 php artisan vendor:publish --provider="awssat\Visits\VisitsServiceProvider"
 ```
-
-### Upgrade to 1.4.0 from 1.3.*
-
-- Prfiex updated from `bareq` to `visits` if you missing your data try to revert prefex value to `bareq`
-  
-
 
 ### Note : Redis Database Name
 
@@ -179,6 +172,16 @@ visits($post)->countries()
 visits($post)->refs()
 ```
 
+## Operating Systems of visitors
+``` php
+visits($post)->operatingSystems()
+```
+
+## Languages of visitors
+``` php
+visits($post)->languages()
+```
+
 
 ## Top or Lowest list per model type
 
@@ -252,6 +255,8 @@ visits('App\Post')->reset('lists')
 visits('App\Post')->period('year')->reset() 
 //...?
 visits('App\Post')->reset('factory')
+//increment/decrement methods offer ignore parameter to stop recording any items of ('country', 'refer', 'periods', 'operatingSystem', 'language')
+visits('App\Post')->increment(1, false, ['country'])
 ```
 
 ## Integration with Eloquent
