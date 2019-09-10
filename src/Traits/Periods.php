@@ -3,6 +3,7 @@
 namespace awssat\Visits\Traits;
 
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Exception;
 
 trait Periods
@@ -42,7 +43,7 @@ trait Periods
     protected function newExpiration($period)
     {
         try {
-            $periodCarbon = $this->xHoursPeriod($period) ?? Carbon::now()->{'endOf' . studly_case($period)}();
+            $periodCarbon = $this->xHoursPeriod($period) ?? Carbon::now()->{'endOf' . Str::studly($period)}();
         } catch (Exception $e) {
             throw new Exception("Wrong period: `{$period}`! please update config/visits.php file.");
         }

@@ -9,6 +9,7 @@ use awssat\Visits\Traits\Setters;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Redis;
 use Jaybizzle\CrawlerDetect\CrawlerDetect;
 
@@ -60,6 +61,10 @@ class Visits
      * @var boolean
      */
     public $ignoreCrawlers = false;
+    /**
+     * @var array
+     */
+    public $globalIgnore = [];
 
     /**
      * Visits constructor.
@@ -74,6 +79,7 @@ class Visits
         $this->ipSeconds = $config['remember_ip'];
         $this->fresh = $config['always_fresh'];
         $this->ignoreCrawlers = $config['ignore_crawlers'];
+        $this->globalIgnore = $config['global_ignore'];
         $this->subject = $subject;
         $this->keys = new Keys($subject, $tag);
 
@@ -173,8 +179,6 @@ class Visits
      * @param bool $force
      * @param bool $periods
      * @param array $ignore to ignore recording visits of periods, country, refer, language and operatingSystem. pass them on this array.
-     * @param bool $refer
-     * @param bool $operatingSystem
      */
     public function increment($inc = 1, $force = false, $ignore = [])
     {
@@ -182,10 +186,14 @@ class Visits
             $this->redis->zincrby($this->keys->visits, $inc, $this->keys->id);
             $this->redis->incrby($this->keys->visitsTotal(), $inc);
 
+            if(is_array($this->globalIgnore) && sizeof($this->globalIgnore) > 0) {
+                $ignore = array_merge($ignore, $this->globalIgnore);
+            }
+
             //NOTE: $$method is parameter also .. ($periods,$country,$refer)
             foreach (['country', 'refer', 'periods', 'operatingSystem', 'language'] as $method) {
                 if(! in_array($method, $ignore))  {
-                    $this->{'record'.studly_case($method)}($inc);
+                    $this->{'record'.Str::studly($method)}($inc);
                 }
             }
         }
