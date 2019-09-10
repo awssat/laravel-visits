@@ -9,6 +9,7 @@ use awssat\Visits\Traits\Setters;
 use Illuminate\Support\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Redis;
 use Jaybizzle\CrawlerDetect\CrawlerDetect;
 
@@ -192,7 +193,7 @@ class Visits
             //NOTE: $$method is parameter also .. ($periods,$country,$refer)
             foreach (['country', 'refer', 'periods', 'operatingSystem', 'language'] as $method) {
                 if(! in_array($method, $ignore))  {
-                    $this->{'record'.studly_case($method)}($inc);
+                    $this->{'record'.Str::studly($method)}($inc);
                 }
             }
         }

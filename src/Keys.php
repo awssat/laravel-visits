@@ -64,7 +64,7 @@ class Keys
     public function ip($ip)
     {
         return $this->visits . '_' .
-            snake_case("recorded_ips:" . ($this->instanceOfModel ? "{$this->id}:" : '') . $ip);
+            Str::snake("recorded_ips:" . ($this->instanceOfModel ? "{$this->id}:" : '') . $ip);
     }
 
 
