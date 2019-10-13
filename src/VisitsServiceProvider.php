@@ -2,6 +2,7 @@
 
 namespace Awssat\Visits;
 
+use Awssat\Visits\Commands\CleanCommand;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
 
@@ -49,5 +50,11 @@ class VisitsServiceProvider extends ServiceProvider
             __DIR__.'/config/visits.php',
             'visits'
         );
+
+        $this->app->bind('command.visits:clean', CleanCommand::class);
+
+        $this->commands([
+            'command.visits:clean',
+        ]);
     }
 }
