@@ -1,6 +1,6 @@
 <?php
 
-namespace awssat\Visits\Traits;
+namespace Awssat\Visits\Traits;
 
 use Illuminate\Support\Collection;
 
@@ -13,11 +13,11 @@ trait Lists
      * @param bool $isLow
      * @return \Illuminate\Support\Collection|array
      */
-    public function top($limit = 5, $isLow = false)
+    public function top($limit = 5, $orderByAsc = false)
     {
-        $cacheKey = $this->keys->cache($limit, $isLow);
+        $cacheKey = $this->keys->cache($limit, $orderByAsc);
         $cachedList = $this->cachedList($limit, $cacheKey);
-        $visitsIds = $this->getVisitsIds($limit, $this->keys->visits, $isLow);
+        $visitsIds = $this->getVisitsIds($limit, $this->keys->visits, $orderByAsc);
 
         if($visitsIds === $cachedList->pluck($this->keys->primary)->toArray() && ! $this->fresh) {
             return $cachedList;
@@ -29,58 +29,40 @@ trait Lists
 
     /**
      * Top/low countries
-     *
-     * @param int $limit
-     * @param bool $isLow
-     * @return mixed
      */
-    public function countries($limit = -1, $isLow = false)
+    public function countries($limit = -1, $orderByAsc = false)
     {
-        $range = $isLow ? 'zrange' : 'zrevrange';
-
-        return $this->redis->$range($this->keys->visits . "_countries:{$this->keys->id}", 0, $limit, 'WITHSCORES');
+        return $this->getSortedList('countries', $limit, $orderByAsc, true);
     }
 
     /**
      * top/lows refs
-     *
-     * @param int $limit
-     * @param bool $isLow
-     * @return mixed
      */
-    public function refs($limit = -1, $isLow = false)
+    public function refs($limit = -1, $orderByAsc = false)
     {
-        $range = $isLow ? 'zrange' : 'zrevrange';
-
-        return $this->redis->$range($this->keys->visits . "_referers:{$this->keys->id}", 0, $limit, 'WITHSCORES');
+        return $this->getSortedList('referers', $limit, $orderByAsc, true);
     }
 
     /**
      * top/lows operating systems
-     *
-     * @param int $limit
-     * @param bool $isLow
-     * @return mixed
      */
-    public function operatingSystems($limit = -1, $isLow = false)
+    public function operatingSystems($limit = -1, $orderByAsc = false)
     {
-        $range = $isLow ? 'zrange' : 'zrevrange';
-
-        return $this->redis->$range($this->keys->visits . "_OSes:{$this->keys->id}", 0, $limit, 'WITHSCORES');
+        return $this->getSortedList('OSes', $limit, $orderByAsc, true);
     }
 
     /**
      * top/lows languages
-     *
-     * @param int $limit
-     * @param bool $isLow
-     * @return mixed
      */
-    public function languages($limit = -1, $isLow = false)
+    public function languages($limit = -1, $orderByAsc = false)
     {
-        $range = $isLow ? 'zrange' : 'zrevrange';
+        return $this->getSortedList('languages', $limit, $orderByAsc, true);
+    }
 
-        return $this->redis->$range($this->keys->visits . "_languages:{$this->keys->id}", 0, $limit, 'WITHSCORES');
+
+    protected function getSortedList($name, $limit, $orderByAsc = false, $withValues = true)
+    {
+        return $this->connection->valueList($this->keys->visits . "_{$name}:{$this->keys->id}", $limit, $orderByAsc, $withValues);
     }
 
     /**
@@ -101,11 +83,9 @@ trait Lists
      * @param bool $isLow
      * @return mixed
      */
-    protected function getVisitsIds($limit, $visitsKey, $isLow = false)
+    protected function getVisitsIds($limit, $visitsKey, $orderByAsc = false)
     {
-        $range = $isLow ? 'zrange' : 'zrevrange';
-
-        return array_map('intval', $this->redis->$range($visitsKey, 0, $limit - 1));
+        return array_map('intval', $this->connection->valueList($visitsKey, $limit - 1, $orderByAsc));
     }
 
     /**
@@ -116,14 +96,15 @@ trait Lists
     protected function freshList($cacheKey, $visitsIds)
     {
         if (count($visitsIds)) {
-            $this->redis->del($cacheKey);
+
+            $this->connection->delete($cacheKey);
 
             return ($this->subject)::whereIn($this->keys->primary, $visitsIds)
                 ->get()
                 ->sortBy(function ($subject) use ($visitsIds) {
                     return array_search($subject->{$this->keys->primary}, $visitsIds);
                 })->each(function ($subject) use ($cacheKey) {
-                    $this->redis->rpush($cacheKey, serialize($subject));
+                    $this->connection->addToFlatList($cacheKey, serialize($subject));
                 });
         }
 
@@ -138,7 +119,7 @@ trait Lists
     protected function cachedList($limit, $cacheKey)
     {
         return Collection::make(
-            array_map('unserialize', $this->redis->lrange($cacheKey, 0, $limit - 1))
+            array_map('unserialize', $this->connection->flatList($cacheKey, $limit))
         );
     }
 }

@@ -4,6 +4,6 @@ if (! function_exists('visits'))
 {
     function visits($subject, $tag = 'visits')
     {
-        return new \awssat\Visits\Visits($subject, $tag);
+        return new \Awssat\Visits\Visits($subject, $tag);
     }
 }

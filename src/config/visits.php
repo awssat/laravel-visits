@@ -1,17 +1,28 @@
 <?php
 
 return [
+    /*
+    |--------------------------------------------------------------------------
+    | Database Engine & Connection Name
+    |--------------------------------------------------------------------------
+    |
+    | Supported Egnines: "redis", "eloquent"
+    | Connection Name: see config/database.php 
+    |
+    */
+    'engine' => 'redis',
+    'connection' => 'laravel-visits',
+
 
     /*
     |--------------------------------------------------------------------------
     | Counters periods
     |--------------------------------------------------------------------------
     |
-    | Set time in days for each periods counter , you can leave it blank if you like
+    | Record visits (total) of each one of these periods in this set (can be empty)
     |
     */
     'periods' => [
-
         'day',
         'week',
         'month',
@@ -23,44 +34,32 @@ return [
     | Redis prefix
     |--------------------------------------------------------------------------
     */
-    'redis_keys_prefix' =>  'visits',
+    'keys_prefix' =>  'visits',
 
     /*
     |--------------------------------------------------------------------------
     | Remember ip for x seconds of time
     |--------------------------------------------------------------------------
     |
-    | Prevent counts duplication by remembering each ip has visited the page for x seconds.
-    | Visits from same ip will be counted after ip expire
+    | Will count only one visit of an IP during this specified time.
     |
     */
     'remember_ip' => 15 * 60,
 
     /*
     |--------------------------------------------------------------------------
-    | Always make fresh top/low lists
+    | Always return uncached fresh top/low lists
     |--------------------------------------------------------------------------
     */
     'always_fresh' => false,
 
-    /*
-    |--------------------------------------------------------------------------
-    | Redis Database Connection Name
-    |--------------------------------------------------------------------------
-    |
-    | When using "redis" you may specify a
-    | connection that should be used to manage your database storage. This should
-    | correspond to a connection in your database configuration options.
-    |
-    */
-    'connection' => 'laravel-visits',
 
     /*
     |--------------------------------------------------------------------------
     | Ignore Crawlers
     |--------------------------------------------------------------------------
     |
-    | Doesn't count crawlers visits
+    | Ignore counting crawlers visits or not
     |
     */
     'ignore_crawlers' => true,

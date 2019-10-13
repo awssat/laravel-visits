@@ -1,6 +1,6 @@
 <?php
 
-namespace awssat\Visits;
+namespace Awssat\Visits;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
@@ -17,6 +17,12 @@ class VisitsServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/config/visits.php' => config_path('visits.php'),
         ], 'config');
+
+        if (! class_exists('CreateVisitsTable')) {
+            $this->publishes([
+                __DIR__.'/../database/migrations/create_visits_table.php.stub' => database_path('migrations/'.date('Y_m_d_His', time()).'_create_visits_table.php'),
+            ], 'migrations');
+        }
 
         Carbon::macro('endOfxHours', function ($xhours) {
             if ($xhours > 12) {

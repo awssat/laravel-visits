@@ -40,6 +40,7 @@ Laravel Visits is a counter that can be attached to any model to track its visit
 - Get Top/Lowest visits per a model.
 - Get most visited countries, refs, OSes, and languages ...
 - Get visits per a period of time like a month of a year of an item or model.
+- Supports multiple data engines: Redis or database (any SQL engine that Eloquent supports). 
 
 ## Install
 Via Composer
@@ -49,8 +50,9 @@ composer require awssat/laravel-visits
 #### Requirement
 - Laravel 5.5+
 - PHP 7.1+
-- This package rely heavly on Redis. To use it, make sure that Redis is configured and ready. (see [Laravel Redis Configuration](https://laravel.com/docs/5.6/redis#configuration))
-
+- Data engines options (can be configured from config/visits.php): 
+  - Redis: make sure that Redis is configured and ready. (see [Laravel Redis Configuration](https://laravel.com/docs/5.6/redis#configuration))
+  - Database: publish migration file: `php artisan vendor:publish --provider="Awssat\Visits\VisitsServiceProvider" --tag="migrations"` then migrate.
 
 
 #### Config
@@ -77,11 +79,8 @@ To prvent any data loss add a new conection on `config/database.php`
 ```
 
 and you can define your redis connection name on `config/visits.php`
-
 ``` php
-
 'connection' => 'default' // to 'laravel-visits'
-
 ```
 
 

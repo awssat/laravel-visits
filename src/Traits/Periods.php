@@ -1,9 +1,10 @@
 <?php
 
-namespace awssat\Visits\Traits;
+namespace Awssat\Visits\Traits;
 
 use Illuminate\Support\Carbon;
 use Exception;
+use Illuminate\Support\Str;
 
 trait Periods
 {
@@ -17,32 +18,23 @@ trait Periods
 
             if ($this->noExpiration($periodKey)) {
                 $expireInSeconds = $this->newExpiration($period);
-                $this->redis->incrby($periodKey . '_total', 0);
-                $this->redis->zincrby($periodKey, 0, 0);
-                $this->redis->expire($periodKey, $expireInSeconds);
-                $this->redis->expire($periodKey . '_total', $expireInSeconds);
+                $this->connection->increment($periodKey.'_total', 0);
+                $this->connection->increment($periodKey, 0, 0);
+                $this->connection->setExpiration($periodKey, $expireInSeconds);
+                $this->connection->setExpiration($periodKey.'_total', $expireInSeconds);
             }
         }
     }
 
-    /**
-     * @param $periodKey
-     * @return bool
-     */
     protected function noExpiration($periodKey)
     {
-        return $this->redis->ttl($periodKey) == -1 || !$this->redis->exists($periodKey);
+        return $this->connection->timeLeft($periodKey) == -1 || ! $this->connection->exists($periodKey);
     }
 
-    /**
-     * @param $period
-     * @return int
-     * @throws Exception
-     */
     protected function newExpiration($period)
     {
         try {
-            $periodCarbon = $this->xHoursPeriod($period) ?? Carbon::now()->{'endOf' . studly_case($period)}();
+            $periodCarbon = $this->xHoursPeriod($period) ?? Carbon::now()->{'endOf' . Str::studly($period)}();
         } catch (Exception $e) {
             throw new Exception("Wrong period: `{$period}`! please update config/visits.php file.");
         }

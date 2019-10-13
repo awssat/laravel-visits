@@ -6,3 +6,5 @@ composer.lock
 .env
 .DS_Store
 /.vscode
+.phpunit.result.cache
+dump.rdb
