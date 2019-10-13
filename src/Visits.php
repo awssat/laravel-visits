@@ -73,7 +73,7 @@ class Visits
 
         $this->connection = $this->determineConnection($config['engine'] ?? 'redis')
                                 ->connect($config['connection'])
-                                ->setPrefix($config['keys_prefix']);
+                                ->setPrefix($config['keys_prefix'] ?? $config['redis_keys_prefix'] ?? 'visits');
 
         if(! $this->connection) {
             return;
