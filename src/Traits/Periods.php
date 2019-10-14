@@ -3,8 +3,8 @@
 namespace Awssat\Visits\Traits;
 
 use Illuminate\Support\Carbon;
-use Exception;
 use Illuminate\Support\Str;
+use Exception;
 
 trait Periods
 {

@@ -19,8 +19,7 @@ trait Record
      */
     protected function recordRefer($inc)
     {
-        $referer = app(Referer::class)->get();
-        $this->connection->increment($this->keys->visits."_referers:{$this->keys->id}", $inc, $referer);
+        $this->connection->increment($this->keys->visits."_referers:{$this->keys->id}", $inc, $this->getVisitorReferer());
     }
 
     /**
@@ -56,7 +55,7 @@ trait Record
      *  Gets visitor country code
      * @return mixed|string
      */
-    protected function getVisitorCountry()
+    public function getVisitorCountry()
     {
         return strtolower(geoip()->getLocation()->iso_code);
     }
@@ -94,6 +93,19 @@ trait Record
      */
     public function getVisitorLanguage()
     {
-        return request()->getPreferredLanguage();
+        $language = request()->getPreferredLanguage();
+        if (false !== $position = strpos($language, '_')) {
+            $language = substr($language, 0, $position);
+        }
+        return $language;
+    }
+
+    /**
+     *  Gets visitor referer
+     * @return mixed|string
+     */
+    public function getVisitorReferer()
+    {
+        return app(Referer::class)->get();
     }
 }
