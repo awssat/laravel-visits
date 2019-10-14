@@ -1,6 +1,6 @@
 <?php
 
-namespace awssat\Visits\Traits;
+namespace Awssat\Visits\Traits;
 
 trait Setters
 {

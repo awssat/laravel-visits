@@ -1,18 +1,11 @@
 <?php
 
-namespace awssat\Visits;
+namespace Awssat\Visits;
 
 class Reset extends Visits
 {
     protected $keys;
 
-    /**
-     * Reset constructor.
-     * @param Visits $parent
-     * @param Keys $keys
-     * @param $method
-     * @param $args
-     */
     public function __construct(Visits $parent, $method, $args)
     {
         parent::__construct($parent->subject);
@@ -29,7 +22,6 @@ class Reset extends Visits
 
     /**
      * Reset everything
-     *
      */
     public function factory()
     {
@@ -49,57 +41,55 @@ class Reset extends Visits
     public function visits()
     {
         if ($this->keys->id) {
-            $this->redis->zrem($this->keys->visits, $this->keys->id);
-            $this->redis->del($this->keys->visits . "_countries:{$this->keys->id}");
-            $this->redis->del($this->keys->visits . "_referers:{$this->keys->id}");
-            $this->redis->del($this->keys->visits . "_OSes:{$this->keys->id}");
-            $this->redis->del($this->keys->visits . "_languages:{$this->keys->id}");
+            $this->connection->delete($this->keys->visits, $this->keys->id);
+            foreach (['countries', 'referers', 'OSes', 'languages'] as $item) {
+                $this->connection->delete($this->keys->visits."_{$item}:{$this->keys->id}");
+            }
 
             foreach ($this->periods as $period => $_) {
-                $this->redis->zrem($this->keys->period($period), $this->keys->id);
+                $this->connection->delete($this->keys->period($period), $this->keys->id);
             }
 
             $this->ips();
         } else {
-            $this->redis->del($this->keys->visits);
-            $this->redis->del($this->keys->visits . '_total');
+            $this->connection->delete($this->keys->visits);
+            $this->connection->delete($this->keys->visits.'_total');
         }
-
     }
 
     public function allrefs()
     {
-        $cc = $this->redis->keys($this->keys->visits . '_referers:*');
+        $cc = $this->connection->search($this->keys->visits.'_referers:*');
 
         if (count($cc)) {
-            $this->redis->del($cc);
+            $this->connection->delete($cc);
         }
     }
 
     public function allOperatingSystems()
     {
-        $cc = $this->redis->keys($this->keys->visits . '_OSes:*');
+        $cc = $this->connection->search($this->keys->visits.'_OSes:*');
 
         if (count($cc)) {
-            $this->redis->del($cc);
+            $this->connection->delete($cc);
         }
     }
 
     public function allLanguages()
     {
-        $cc = $this->redis->keys($this->keys->visits . '_languages:*');
+        $cc = $this->connection->search($this->keys->visits.'_languages:*');
 
         if (count($cc)) {
-            $this->redis->del($cc);
+            $this->connection->delete($cc);
         }
     }
 
     public function allcountries()
     {
-        $cc = $this->redis->keys($this->keys->visits . '_countries:*');
+        $cc = $this->connection->search($this->keys->visits.'_countries:*');
 
         if (count($cc)) {
-            $this->redis->del($cc);
+            $this->connection->delete($cc);
         }
     }
 
@@ -108,10 +98,10 @@ class Reset extends Visits
      */
     public function periods()
     {
-        foreach ($this->periods as $period => $days) {
+        foreach ($this->periods as $period => $_) {
             $periodKey = $this->keys->period($period);
-            $this->redis->del($periodKey);
-            $this->redis->del($periodKey . '_total');
+            $this->connection->delete($periodKey);
+            $this->connection->delete($periodKey.'_total');
         }
     }
 
@@ -121,10 +111,10 @@ class Reset extends Visits
      */
     public function ips($ips = '*')
     {
-        $ips = $this->redis->keys($this->keys->ip($ips));
+        $ips = $this->connection->search($this->keys->ip($ips));
 
         if (count($ips)) {
-            $this->redis->del($ips);
+            $this->connection->delete($ips);
         }
     }
 
@@ -133,9 +123,10 @@ class Reset extends Visits
      */
     public function lists()
     {
-        $lists = $this->redis->keys($this->keys->cache());
+        $lists = $this->connection->search($this->keys->cache());
+
         if (count($lists)) {
-            $this->redis->del($lists);
+            $this->connection->delete($lists);
         }
     }
 }

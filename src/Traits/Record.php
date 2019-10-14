@@ -1,6 +1,6 @@
 <?php
 
-namespace awssat\Visits\Traits;
+namespace Awssat\Visits\Traits;
 
 use Spatie\Referer\Referer;
 
@@ -11,7 +11,7 @@ trait Record
      */
     protected function recordCountry($inc)
     {
-        $this->redis->zincrby($this->keys->visits."_countries:{$this->keys->id}", $inc, $this->getVisitorCountry());
+        $this->connection->increment($this->keys->visits."_countries:{$this->keys->id}", $inc, $this->getVisitorCountry());
     }
 
     /**
@@ -19,7 +19,7 @@ trait Record
      */
     protected function recordRefer($inc)
     {
-        $this->redis->zincrby($this->keys->visits."_referers:{$this->keys->id}", $inc, $this->getVisitorReferer());
+        $this->connection->increment($this->keys->visits."_referers:{$this->keys->id}", $inc, $this->getVisitorReferer());
     }
 
     /**
@@ -27,7 +27,7 @@ trait Record
      */
     protected function recordOperatingSystem($inc)
     {
-        $this->redis->zincrby($this->keys->visits."_OSes:{$this->keys->id}", $inc, $this->getVisitorOperatingSystem());
+        $this->connection->increment($this->keys->visits."_OSes:{$this->keys->id}", $inc, $this->getVisitorOperatingSystem());
     }
 
     /**
@@ -35,7 +35,7 @@ trait Record
      */
     protected function recordLanguage($inc)
     {
-        $this->redis->zincrby($this->keys->visits."_languages:{$this->keys->id}", $inc, $this->getVisitorLanguage());
+        $this->connection->increment($this->keys->visits."_languages:{$this->keys->id}", $inc, $this->getVisitorLanguage());
     }
 
     /**
@@ -46,8 +46,8 @@ trait Record
         foreach ($this->periods as $period) {
             $periodKey = $this->keys->period($period);
 
-            $this->redis->zincrby($periodKey, $inc, $this->keys->id);
-            $this->redis->incrby($periodKey.'_total', $inc);
+            $this->connection->increment($periodKey, $inc, $this->keys->id);
+            $this->connection->increment($periodKey.'_total', $inc);
         }
     }
 

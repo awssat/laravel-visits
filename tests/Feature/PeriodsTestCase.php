@@ -1,20 +1,18 @@
 <?php
 
-namespace awssat\Visits\Tests\Feature;
+namespace Awssat\Visits\Tests\Feature;
 
-use awssat\Visits\Tests\TestCase;
+use Awssat\Visits\Tests\TestCase;
 use Illuminate\Support\Carbon;
-use awssat\Visits\Tests\Post;
+use Awssat\Visits\Tests\Post;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 
-class PeriodsTest extends TestCase
+class PeriodsTestCase extends TestCase
 {
     use RefreshDatabase;
 
-    protected $redis;
-
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
     }
@@ -37,7 +35,8 @@ class PeriodsTest extends TestCase
             visits($post)->period('3hours')->count(),
         ]);
 
-        sleep(1);
+        Carbon::setTestNow(now()->addSeconds(1));
+        sleep(1);//for redis
 
         $this->assertEquals([1, 0], [
             visits($post)->count(),
@@ -48,9 +47,9 @@ class PeriodsTest extends TestCase
     /** @test */
     public function day_test()
     {
-        $time = Carbon::now();
-
-        Carbon::setTestNow($time->endOfDay());
+        Carbon::setTestNow(
+            $time = Carbon::now()->endOfDay()
+        );
 
         $post = Post::create()->fresh();
 
@@ -60,18 +59,20 @@ class PeriodsTest extends TestCase
         $this->assertEquals([1, 1, 1], [
             visits($post)->count(),
             visits($post)->period('day')->count(),
-            visits('awssat\Visits\Tests\Post')->period('day')->count(),
+            visits('Awssat\Visits\Tests\Post')->period('day')->count(),
         ]);
 
         //time until redis delete periods
-        $this->assertEquals(1, visits($post)->period('day')
-            ->timeLeft()->diffInSeconds());
+        $this->assertEquals(1, visits($post)->period('day')->timeLeft());
 
-        $this->assertEquals(1,  visits('awssat\Visits\Tests\Post')
-            ->period('day')->timeLeft()->diffInSeconds());
+        $this->assertEquals(
+            1,  
+            visits('Awssat\Visits\Tests\Post')->period('day')->timeLeft()
+        );
 
         //after seconds it should be empty for week and day
-        sleep(1);
+        Carbon::setTestNow(Carbon::now()->addSeconds(1));
+        sleep(1); //for redfis
 
         $this->assertEquals([1, 0,], [
             visits($post)->count(),
@@ -81,7 +82,6 @@ class PeriodsTest extends TestCase
         //he came after a 5 minute later
         Carbon::setTestNow(Carbon::now()->addMinutes(5));
 
-        sleep(1);
 
         visits($post)->forceIncrement();
 
@@ -92,10 +92,10 @@ class PeriodsTest extends TestCase
 
 
         //time until redis delete periods
-        $this->assertEquals(1, visits($post)->period('day')->timeLeft()->diffInDays($time));
+        $this->assertEquals(1, now()->addSeconds(visits($post)->period('day')->timeLeft())->diffInDays($time));
 
         //time until redis delete periods
-        $this->assertEquals(1, visits('awssat\Visits\Tests\Post')->period('day')->timeLeft()->diffInDays($time));
+        $this->assertEquals(1, now()->addSeconds(visits('Awssat\Visits\Tests\Post')->period('day')->timeLeft())->diffInDays($time));
     }
 
     /** @test */
@@ -118,7 +118,9 @@ class PeriodsTest extends TestCase
         ]);
 
         //after seconds it should be empty for week and day
-        sleep(1);
+        Carbon::setTestNow(Carbon::now()->addSeconds(1));
+        sleep(1); //for redis
+
         $this->assertEquals([1, 0, 0, 1, 1], [
             visits($post)->count(),
             visits($post)->period('day')->count(),
@@ -130,7 +132,7 @@ class PeriodsTest extends TestCase
         //he came after a 5 minute later
         Carbon::setTestNow(Carbon::now()->endOfWeek()->addHours(1));
 
-        sleep(1);
+
         visits($post)->forceIncrement();
 
         $this->assertEquals([2, 1, 1, 2, 2], [
@@ -158,36 +160,37 @@ class PeriodsTest extends TestCase
 
         //it should be there fo breif of time
         $this->assertEquals([2, 2, 2, 2, 2], [
-            visits('awssat\Visits\Tests\Post')->count(),
-            visits('awssat\Visits\Tests\Post')->period('day')->count(),
-            visits('awssat\Visits\Tests\Post')->period('week')->count(),
-            visits('awssat\Visits\Tests\Post')->period('month')->count(),
-            visits('awssat\Visits\Tests\Post')->period('year')->count()
+            visits('Awssat\Visits\Tests\Post')->count(),
+            visits('Awssat\Visits\Tests\Post')->period('day')->count(),
+            visits('Awssat\Visits\Tests\Post')->period('week')->count(),
+            visits('Awssat\Visits\Tests\Post')->period('month')->count(),
+            visits('Awssat\Visits\Tests\Post')->period('year')->count()
         ]);
 
         //after seconds it should be empty for week and day
-        sleep(1);
+        Carbon::setTestNow(Carbon::now()->addSeconds(1));
+        sleep(1); //for redis
+
         $this->assertEquals([2, 0, 0, 2, 2], [
-            visits('awssat\Visits\Tests\Post')->count(),
-            visits('awssat\Visits\Tests\Post')->period('day')->count(),
-            visits('awssat\Visits\Tests\Post')->period('week')->count(),
-            visits('awssat\Visits\Tests\Post')->period('month')->count(),
-            visits('awssat\Visits\Tests\Post')->period('year')->count()
+            visits('Awssat\Visits\Tests\Post')->count(),
+            visits('Awssat\Visits\Tests\Post')->period('day')->count(),
+            visits('Awssat\Visits\Tests\Post')->period('week')->count(),
+            visits('Awssat\Visits\Tests\Post')->period('month')->count(),
+            visits('Awssat\Visits\Tests\Post')->period('year')->count()
         ]);
 
         //he came after a 5 minute later
         Carbon::setTestNow(Carbon::now()->endOfWeek()->addHours(1));
 
-        sleep(1);
         visits($post2)->forceIncrement();
         visits($post2)->forceIncrement();
 
         $this->assertEquals([4, 2, 2, 4, 4], [
-            visits('awssat\Visits\Tests\Post')->count(),
-            visits('awssat\Visits\Tests\Post')->period('day')->count(),
-            visits('awssat\Visits\Tests\Post')->period('week')->count(),
-            visits('awssat\Visits\Tests\Post')->period('month')->count(),
-            visits('awssat\Visits\Tests\Post')->period('year')->count()
+            visits('Awssat\Visits\Tests\Post')->count(),
+            visits('Awssat\Visits\Tests\Post')->period('day')->count(),
+            visits('Awssat\Visits\Tests\Post')->period('week')->count(),
+            visits('Awssat\Visits\Tests\Post')->period('month')->count(),
+            visits('Awssat\Visits\Tests\Post')->period('year')->count()
         ]);
     }
 }

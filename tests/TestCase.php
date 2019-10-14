@@ -1,10 +1,10 @@
 <?php
 
-namespace awssat\Visits\Tests;
+namespace Awssat\Visits\Tests;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Schema\Blueprint;
-use awssat\Visits\VisitsServiceProvider;
+use Awssat\Visits\VisitsServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 use Spatie\Referer\Referer;
 use Spatie\Referer\CaptureReferer;
@@ -20,13 +20,14 @@ abstract class TestCase extends BaseTestCase
     protected $referer;
 
     protected $redis;
+    protected $connection;
 
     /**
      * Setup the test environment.
      *
      * @return void
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -38,19 +39,6 @@ abstract class TestCase extends BaseTestCase
         $this->referer = $this->app['referer'];
 
         $this->runTestMigrations();
-
-        $this->app['config']['database.redis.laravel-visits'] = [
-            'host' => env('REDIS_HOST', 'localhost'),
-            'password' => env('REDIS_PASSWORD', null),
-            'port' => env('REDIS_PORT', 6379),
-            'database' => 3,
-        ];
-
-        $this->redis = Redis::connection('laravel-visits');
-
-        if (count($cc = $this->redis->keys('visits:testing:*'))) {
-            $this->redis->del($cc);
-        }
     }
 
 

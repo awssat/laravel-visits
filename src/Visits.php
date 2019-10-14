@@ -1,16 +1,11 @@
 <?php
 
-namespace awssat\Visits;
+namespace Awssat\Visits;
 
-use awssat\Visits\Traits\Lists;
-use awssat\Visits\Traits\Periods;
-use awssat\Visits\Traits\Record;
-use awssat\Visits\Traits\Setters;
-use Illuminate\Support\Carbon;
+use Awssat\Visits\Traits\{Lists, Periods, Record, Setters};
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Redis;
 use Jaybizzle\CrawlerDetect\CrawlerDetect;
 
 class Visits
@@ -53,10 +48,12 @@ class Visits
      * @var Keys
      */
     protected $keys;
+
     /**
-     * @var Redis
+     * @var \Awssat\DataEngines\DataEngine
      */
-    public $redis;
+    protected $connection;
+
     /**
      * @var boolean
      */
@@ -67,28 +64,49 @@ class Visits
     public $globalIgnore = [];
 
     /**
-     * Visits constructor.
-     * @param $subject
-     * @param string $tag|null
+     * @param \Illuminate\Database\Eloquent\Model $subject any model
+     * @param string $tag use only if you want to use visits on multiple models
      */
     public function __construct($subject = null, $tag = 'visits')
     {
         $config = config('visits');
-        $this->redis = Redis::connection($config['connection']);
+
+        $this->connection = $this->determineConnection($config['engine'] ?? 'redis')
+                                ->connect($config['connection'])
+                                ->setPrefix($config['keys_prefix'] ?? $config['redis_keys_prefix'] ?? 'visits');
+
+        if(! $this->connection) {
+            return;
+        }
+
         $this->periods = $config['periods'];
         $this->ipSeconds = $config['remember_ip'];
         $this->fresh = $config['always_fresh'];
         $this->ignoreCrawlers = $config['ignore_crawlers'];
         $this->globalIgnore = $config['global_ignore'];
         $this->subject = $subject;
-        $this->keys = new Keys($subject, $tag);
+        $this->keys = new Keys($subject, preg_replace('/[^a-z0-9_]/i', '', $tag));
 
         $this->periodsSync();
     }
 
+    protected function determineConnection($name)
+    {
+        $connections = [
+            'redis' => \Awssat\Visits\DataEngines\RedisEngine::class,
+            'eloquent' => \Awssat\Visits\DataEngines\EloquentEngine::class
+        ];
+
+        if(! array_key_exists($name, $connections)) {
+            throw new Exception("(Laravel-Visits) The selected engine `{$name}` is not supported! Please correct this issue from config/visits.php.");
+        }
+
+        return app($connections[$name]);
+    }
+
     /**
      * @param $subject
-     * @return $this
+     * @return self
      */
     public function by($subject)
     {
@@ -106,7 +124,7 @@ class Visits
      *
      * @param $method
      * @param string $args
-     * @return Reset
+     * @return \Awssat\Visits\Reset
      */
     public function reset($method = 'visits', $args = '')
     {
@@ -115,56 +133,57 @@ class Visits
 
     /**
      * Check for the ip is has been recorded before
-     *
      * @return bool
-     * @internal param $subject
      */
     public function recordedIp()
     {
-        return ! $this->redis->set($this->keys->ip(request()->ip()), true, 'EX', $this->ipSeconds, 'NX');
+        if(! $this->connection->exists($this->keys->ip(request()->ip()))) {
+            $this->connection->set($this->keys->ip(request()->ip()), true);
+            $this->connection->setExpiration($this->keys->ip(request()->ip()), $this->ipSeconds);
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
-     * Get visits of model instance.
-     *
+     * Get visits of model incount(stance.
      * @return mixed
-     * @internal param $subject
      */
     public function count()
     {
         if ($this->country) {
-            return $this->redis->zscore($this->keys->visits . "_countries:{$this->keys->id}", $this->country);
+            return $this->connection->get($this->keys->visits."_countries:{$this->keys->id}", $this->country);
         } else if ($this->referer) {
-            return $this->redis->zscore($this->keys->visits . "_referers:{$this->keys->id}", $this->referer);
+            return $this->connection->get($this->keys->visits."_referers:{$this->keys->id}", $this->referer);
         } else if ($this->operatingSystem) {
-            return $this->redis->zscore($this->keys->visits . "_OSes:{$this->keys->id}", $this->operatingSystem);
+            return $this->connection->get($this->keys->visits."_OSes:{$this->keys->id}", $this->operatingSystem);
         } else if ($this->language) {
-            return $this->redis->zscore($this->keys->visits . "_languages:{$this->keys->id}", $this->language);
+            return $this->connection->get($this->keys->visits."_languages:{$this->keys->id}", $this->language);
         }
 
         return intval(
-            $this->keys->instanceOfModel ?
-                $this->redis->zscore($this->keys->visits, $this->keys->id) :
-                $this->redis->get($this->keys->visitsTotal())
+            $this->keys->instanceOfModel
+                    ? $this->connection->get($this->keys->visits, $this->keys->id)
+                    : $this->connection->get($this->keys->visitsTotal())
         );
     }
 
     /**
-     * use diffForHumans to show diff
-     * @return Carbon
+     * @return integer time left in seconds
      */
     public function timeLeft()
     {
-        return Carbon::now()->addSeconds($this->redis->ttl($this->keys->visits));
+        return $this->connection->timeLeft($this->keys->visits);
     }
 
     /**
-     * use diffForHumans to show diff
-     * @return Carbon
+     * @return integer time left in seconds
      */
     public function ipTimeLeft()
     {
-        return Carbon::now()->addSeconds($this->redis->ttl($this->keys->ip(request()->ip())));
+        return $this->connection->timeLeft($this->keys->ip(request()->ip()));
     }
 
     protected function isCrawler()
@@ -173,18 +192,15 @@ class Visits
     }
 
     /**
-     * Increment a new/old subject to the cache.
-     *
-     * @param int $inc
-     * @param bool $force
-     * @param bool $periods
+     * @param int $inc value to increment
+     * @param bool $force force increment, skip time limit
      * @param array $ignore to ignore recording visits of periods, country, refer, language and operatingSystem. pass them on this array.
      */
     public function increment($inc = 1, $force = false, $ignore = [])
     {
         if ($force || (!$this->isCrawler() && !$this->recordedIp())) {
-            $this->redis->zincrby($this->keys->visits, $inc, $this->keys->id);
-            $this->redis->incrby($this->keys->visitsTotal(), $inc);
+            $this->connection->increment($this->keys->visits, $inc, $this->keys->id);
+            $this->connection->increment($this->keys->visitsTotal(), $inc);
 
             if(is_array($this->globalIgnore) && sizeof($this->globalIgnore) > 0) {
                 $ignore = array_merge($ignore, $this->globalIgnore);
@@ -236,6 +252,6 @@ class Visits
     public function expireAt($period, $time)
     {
         $periodKey = $this->keys->period($period);
-        return $this->redis->expire($periodKey, $time);
+        return $this->connection->setExpiration($periodKey, $time);
     }
 }
