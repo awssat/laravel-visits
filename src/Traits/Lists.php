@@ -85,7 +85,7 @@ trait Lists
      */
     protected function getVisitsIds($limit, $visitsKey, $orderByAsc = false)
     {
-        return array_map('intval', $this->connection->valueList($visitsKey, $limit - 1, $orderByAsc));
+        return $this->connection->valueList($visitsKey, $limit - 1, $orderByAsc);
     }
 
     /**
