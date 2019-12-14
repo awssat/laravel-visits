@@ -98,7 +98,7 @@ class Visits
         ];
 
         if(! array_key_exists($name, $connections)) {
-            throw new Exception("(Laravel-Visits) The selected engine `{$name}` is not supported! Please correct this issue from config/visits.php.");
+            throw new \Exception("(Laravel-Visits) The selected engine `{$name}` is not supported! Please correct this issue from config/visits.php.");
         }
 
         return app($connections[$name]);

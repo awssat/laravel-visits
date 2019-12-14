@@ -18,9 +18,8 @@ trait Lists
         $cacheKey = $this->keys->cache($limit, $orderByAsc);
         $cachedList = $this->cachedList($limit, $cacheKey);
         $visitsIds = $this->getVisitsIds($limit, $this->keys->visits, $orderByAsc);
-        $cachedIds = array_map('strval', $cachedList->pluck($this->keys->primary)->toArray());
 
-        if($visitsIds === $cachedIds && ! $this->fresh) {
+        if($visitsIds === $cachedList->pluck($this->keys->primary)->toArray() && ! $this->fresh) {
             return $cachedList;
         }
 
@@ -86,7 +85,9 @@ trait Lists
      */
     protected function getVisitsIds($limit, $visitsKey, $orderByAsc = false)
     {
-        return $this->connection->valueList($visitsKey, $limit - 1, $orderByAsc);
+        return array_map(function($item) {
+            return is_numeric($item) ? intval($item) : $item;
+        }, $this->connection->valueList($visitsKey, $limit - 1, $orderByAsc));
     }
 
     /**
