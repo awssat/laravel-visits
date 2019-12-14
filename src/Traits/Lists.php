@@ -18,8 +18,9 @@ trait Lists
         $cacheKey = $this->keys->cache($limit, $orderByAsc);
         $cachedList = $this->cachedList($limit, $cacheKey);
         $visitsIds = $this->getVisitsIds($limit, $this->keys->visits, $orderByAsc);
+        $cachedIds = array_map('strval', $cachedList->pluck($this->keys->primary)->toArray());
 
-        if($visitsIds === $cachedList->pluck($this->keys->primary)->toArray() && ! $this->fresh) {
+        if($visitsIds === $cachedIds && ! $this->fresh) {
             return $cachedList;
         }
 
