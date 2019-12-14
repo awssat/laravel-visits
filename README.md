@@ -35,11 +35,13 @@ Laravel Visits is a counter that can be attached to any model to track its visit
 
 ## Features
 - A model item can have many types of recorded visits (using tags).
-- It's not limited to one type of Model (like some packages that allow only the User model).
-- Record per visitors and not by visits using IP detecting, so even with the refresh, visit won't duplicate (can be changed from config).
-- Get Top/Lowest visits per model.
+- It's not limited to one type of Model (like some packages that allow only User model).
+- Record per visitors and not by vistis using IP detecting, so even with refresh, visit won't duplicate (can be changed from config). 
+- Get Top/Lowest visits per a model.
 - Get most visited countries, refs, OSes, and languages.
-- Get visits per period of time like a month of a year of an item or model.
+- Get visits per a period of time like a month of a year of an item or model.
+- Supports multiple data engines: Redis or database (any SQL engine that Eloquent supports). 
+
 
 ## Install
 To get started with Laravel Visits, use Composer to add the package to your project's dependencies:
@@ -48,10 +50,10 @@ composer require awssat/laravel-visits
 ```
 #### Requirement
 - Laravel 5.5+
-- PHP 7.1+
-- This package relies heavily on Redis.
-To use it, make sure that Redis is configured and ready.
-Learn More => [Laravel Redis Configuration](https://laravel.com/docs/5.6/redis#configuration)
+- PHP 7.2+
+- Data engines options (can be configured from config/visits.php): 
+  - Redis: make sure that Redis is configured and ready. (see [Laravel Redis Configuration](https://laravel.com/docs/5.6/redis#configuration))
+  - Database: publish migration file: `php artisan vendor:publish --provider="Awssat\Visits\VisitsServiceProvider" --tag="migrations"` then migrate.
 
 
 
@@ -78,8 +80,8 @@ To prevent any data loss add a new connection on `config/database.php`
 ```
 
 and you can define your redis connection name on `config/visits.php`
-
 ```php
+
 'connection' => 'default' // to 'laravel-visits'
 ```
 

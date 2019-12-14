@@ -1,20 +1,20 @@
 <?php
 
-namespace awssat\Visits\Tests\Feature;
+namespace Awssat\Visits\Tests\Feature;
 
-use awssat\Visits\Tests\Post;
-use awssat\Visits\Tests\User;
-use awssat\Visits\Tests\TestCase;
+use Awssat\Visits\Tests\Post;
+use Awssat\Visits\Tests\User;
+use Awssat\Visits\Tests\TestCase;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 
-class VisitsTest extends TestCase
+
+abstract class VisitsTestCase extends TestCase
 {
     use RefreshDatabase;
 
-    protected $redis;
-
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
     }
@@ -40,13 +40,12 @@ class VisitsTest extends TestCase
             visits($post)->by($user)->increment();
         }
 
-        $top_visits_overall = visits('awssat\Visits\Tests\Post')
+        $top_visits_overall = visits('Awssat\Visits\Tests\Post')
             ->top(10)
             ->toArray();
-
         $this->assertEmpty($top_visits_overall);
 
-        $top_visits = visits('awssat\Visits\Tests\Post')
+        $top_visits = visits('Awssat\Visits\Tests\Post')
             ->by($user)
             ->top(20)
             ->toArray();
@@ -82,11 +81,11 @@ class VisitsTest extends TestCase
         visits($userA, 'clicks')->increment();
         visits($userA, 'clicks2')->increment();
 
-        $keys = $this->redis->keys('visits:testing:*');
+        $keys = $this->connection->search('testing:*');
 
-        $this->assertContains('visits:testing:posts_visits', $keys);
-        $this->assertContains('visits:testing:posts_clicks', $keys);
-        $this->assertContains('visits:testing:posts_clicks2', $keys);
+        $this->assertContains('testing:posts_visits', $keys);
+        $this->assertContains('testing:posts_clicks', $keys);
+        $this->assertContains('testing:posts_clicks2', $keys);
     }
 
     /** @test */
@@ -98,7 +97,7 @@ class VisitsTest extends TestCase
 
         visits($userA, 'clicks')->increment();
 
-        $this->assertEquals([1, 1, ], [visits($userA)->count(), visits($userA, 'clicks')->count()]);
+        $this->assertEquals([1, 1], [visits($userA)->count(), visits($userA, 'clicks')->count()]);
     }
 
     /** @test */
@@ -114,7 +113,7 @@ class VisitsTest extends TestCase
 
         visits($Post)->forceIncrement(10);
 
-        $this->assertEquals(['twitter.com' => 10, 'google.com' => 1, ], visits($Post)->refs());
+        $this->assertEquals(['twitter.com' => 10, 'google.com' => 1], visits($Post)->refs());
     }
 
     /** @test */
@@ -196,16 +195,15 @@ class VisitsTest extends TestCase
         $post3 = Post::create()->fresh();
 
         visits($post1)->increment(10);
+        visits($post1)->reset();
 
         visits($post2)->increment(5);
-
         visits($post3)->increment();
 
-        visits($post1)->reset();
 
         $this->assertEquals(
             [2, 3],
-            visits('awssat\Visits\Tests\Post')->top(5)->pluck('id')->toArray()
+            visits('Awssat\Visits\Tests\Post')->top(5)->pluck('id')->toArray()
         );
     }
 
@@ -222,10 +220,16 @@ class VisitsTest extends TestCase
             '129.0.0.2',
             '124.0.0.2'
         ];
-        $key = 'visits:testing:posts_visits_recorded_ips:1:';
+    
+        $prefix = 'testing:posts_visits_';
+        $key = $prefix.'recorded_ips:1:';
 
         foreach ($ips as $ip) {
-            $this->redis->set($key.$ip, true, 'EX', 15 * 60, 'NX');
+            if(! $this->connection->exists($key.$ip)) {
+                $this->connection->set($key.$ip, true);
+            } else {
+                $this->connection->setExpiration($key.$ip, 15*60);
+            }
         }
 
         visits($post)->increment(10);
@@ -237,13 +241,14 @@ class VisitsTest extends TestCase
 
         visits($post)->reset('ips', '127.0.0.1');
 
-        $ips_in_redis = Collection::make($this->redis->keys(config('visits.redis_keys_prefix').':testing:posts_visits_recorded_ips:*'))->map(function ($ip) use ($key) {
-            return str_replace($key, '', $ip);
-        });
+        $ips_in_db = Collection::make($this->connection->search($prefix.'recorded_ips:*'))
+                ->map(function ($ip){
+                    return substr($ip, strrpos($ip, ':') + 1);
+                });
 
-        $this->assertArrayNotHasKey(
+        $this->assertNotContains(
             '127.0.0.1',
-            $ips_in_redis->toArray()
+            $ips_in_db
         );
 
         visits($post)->increment(10);
@@ -279,32 +284,33 @@ class VisitsTest extends TestCase
 
         $this->assertEquals(
             Collection::make($arr)->sort()->reverse()->keys()->take(10)->toArray(),
-            visits('awssat\Visits\Tests\Post')->period('day')->top(10)->pluck('id')->toArray()
+            visits('Awssat\Visits\Tests\Post')->period('day')->top(10)->pluck('id')->toArray()
         );
 
         $this->assertEquals(
             Collection::make($arr)->sort()->keys()->take(10)->toArray(),
-            visits('awssat\Visits\Tests\Post')->period('day')->low(11)->pluck('id')->toArray()
+            visits('Awssat\Visits\Tests\Post')->period('day')->low(11)->pluck('id')->toArray()
         );
 
-        visits('awssat\Visits\Tests\Post')->period('day')->reset();
+        visits('Awssat\Visits\Tests\Post')->period('day')->reset();
 
         $this->assertEquals(
             0,
-            visits('awssat\Visits\Tests\Post')->period('day')->count()
+            visits('Awssat\Visits\Tests\Post')->period('day')->count()
         );
+        // dd(visits('Awssat\Visits\Tests\Post')->period('day')->top(10));
 
         $this->assertEmpty(
-            visits('awssat\Visits\Tests\Post')->period('day')->top(10)
+            visits('Awssat\Visits\Tests\Post')->period('day')->top(10)
         );
 
         $this->assertNotEmpty(
-            visits('awssat\Visits\Tests\Post')->top(10)
+            visits('Awssat\Visits\Tests\Post')->top(10)
         );
 
         $this->assertEquals(
             Collection::make($arr)->sum(),
-            visits('awssat\Visits\Tests\Post')->count()
+            visits('Awssat\Visits\Tests\Post')->count()
         );
     }
 
@@ -365,7 +371,9 @@ class VisitsTest extends TestCase
 
         visits($post)->seconds(1)->increment();
 
-        sleep(visits($post)->ipTimeLeft()->diffInSeconds() + 1);
+        Carbon::setTestNow(Carbon::now()->addSeconds(visits($post)->ipTimeLeft() + 1));
+        sleep(1);//for redis
+
 
         visits($post)->increment();
 
@@ -382,7 +390,7 @@ class VisitsTest extends TestCase
             visits($post)->forceIncrement();
         }
 
-        $list = visits('awssat\Visits\Tests\Post')->top(5)->pluck('name');
+        $list = visits('Awssat\Visits\Tests\Post')->top(5)->pluck('name');
 
         $this->assertEquals(5, $list->count());
     }
@@ -404,15 +412,15 @@ class VisitsTest extends TestCase
         visits($post3)->forceIncrement(2);
         visits($post4)->forceIncrement(1);
 
-        $fresh = visits('awssat\Visits\Tests\Post')->top()->pluck('name');
+        $fresh = visits('Awssat\Visits\Tests\Post')->top()->pluck('name');
 
         $post5->update(['name' => 'changed']);
 
-        $cached = visits('awssat\Visits\Tests\Post')->top()->pluck('name');
+        $cached = visits('Awssat\Visits\Tests\Post')->top()->pluck('name');
 
         $this->assertEquals($fresh->first(), $cached->first());
 
-        $fresh2 = visits('awssat\Visits\Tests\Post')
+        $fresh2 = visits('Awssat\Visits\Tests\Post')
             ->fresh()
             ->top()
             ->pluck('name');
