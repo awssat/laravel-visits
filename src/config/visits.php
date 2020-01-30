@@ -6,7 +6,7 @@ return [
     | Database Engine & Connection Name
     |--------------------------------------------------------------------------
     |
-    | Supported Egnines: "redis", "eloquent"
+    | Supported Engines: "redis", "eloquent"
     | Connection Name: see config/database.php 
     |
     */
