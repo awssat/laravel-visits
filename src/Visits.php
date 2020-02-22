@@ -195,6 +195,7 @@ class Visits
      * @param int $inc value to increment
      * @param bool $force force increment, skip time limit
      * @param array $ignore to ignore recording visits of periods, country, refer, language and operatingSystem. pass them on this array.
+     * @return bool
      */
     public function increment($inc = 1, $force = false, $ignore = [])
     {
@@ -212,16 +213,21 @@ class Visits
                     $this->{'record'.Str::studly($method)}($inc);
                 }
             }
+
+            return true;
         }
+
+        return false;
     }
 
     /**
      * @param int $inc
      * @param array $ignore to ignore recording visits like country, periods ...
+     * @return bool
      */
     public function forceIncrement($inc = 1, $ignore = [])
     {
-        $this->increment($inc, true, $ignore);
+        return $this->increment($inc, true, $ignore);
     }
 
     /**
@@ -229,19 +235,21 @@ class Visits
      *
      * @param int $dec
      * @param array $ignore to ignore recording visits like country, periods ...
+     * @return bool
      */
     public function decrement($dec = 1, $force = false, $ignore = [])
     {
-        $this->increment(-$dec, $force, $ignore);
+        return $this->increment(-$dec, $force, $ignore);
     }
 
     /**
      * @param int $dec
      * @param array $ignore to ignore recording visits like country, periods ...
+     * @return bool
      */
     public function forceDecrement($dec = 1, $ignore = [])
     {
-        $this->decrement($dec, true, $ignore);
+        return $this->decrement($dec, true, $ignore);
     }
 
     /**

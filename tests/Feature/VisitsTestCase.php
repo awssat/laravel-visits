@@ -31,6 +31,20 @@ abstract class VisitsTestCase extends TestCase
     }
 
     /** @test * */
+    public function by_cant_repeat_accept_array()
+    {
+        User::create();
+        $post = Post::create();
+
+        $firstResult = visits($post)->increment();
+        $secondResult = visits($post)->increment();
+
+        $this->assertTrue($firstResult);
+        $this->assertFalse($secondResult);
+        $this->assertEquals(1, visits($post)->count());
+    }
+
+    /** @test * */
     public function visits_by_user_lists()
     {
         $user = User::create();
