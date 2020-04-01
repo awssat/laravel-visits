@@ -9,7 +9,9 @@
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZJFHUL6CVPX2G)
 
+> Please support our work here with donation so we can contuine improve this package once we raise fund we will contuine work on this package
 
 Laravel Visits is a counter that can be attached to any model to track its visits with useful features like IP-protection and lists caching.
 
