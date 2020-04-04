@@ -7,12 +7,12 @@ Interface DataEngine
     public function connect(string $connection): self;
     public function setPrefix(string $prefix): self;
 
-    public function increment(string $key, int $value, ?string $member = null): bool;
-    public function decrement(string $key, int $value, ?string $member = null): bool;
+    public function increment(string $key, int $value, $member = null): bool;
+    public function decrement(string $key, int $value, $member = null): bool;
 
-    public function delete($key, ?string $member = null): bool;
-    public function get(string $key, ?string $member = null);
-    public function set(string $key, $value, ?string $member = null): bool;
+    public function delete($key, $member = null): bool;
+    public function get(string $key, $member = null);
+    public function set(string $key, $value, $member = null): bool;
 
     public function flatList(string $key, int $limit): array;
     public function addToFlatList(string $key, $value): bool;

@@ -29,24 +29,24 @@ class RedisEngine implements DataEngine
         return $this;
     }
 
-    public function increment(string $key, int $value, ?string $member = null): bool
+    public function increment(string $key, int $value, $member = null): bool
     {
         if (! empty($member) || is_numeric($member)) {
             $this->connection->zincrby($this->prefix.$key, $value, $member);
         } else {
             $this->connection->incrby($this->prefix.$key, $value);
         }
-        
-        // both methods returns integer and raise an excpetion in case of an error.
+
+        // both methods returns integer and raise an exception in case of an error.
         return true;
     }
 
-    public function decrement(string $key, int $value, ?string $member = null): bool
+    public function decrement(string $key, int $value, $member = null): bool
     {
         return $this->increment($key, -$value, $member);
     }
 
-    public function delete($key, ?string $member = null): bool
+    public function delete($key, $member = null): bool
     {
         if(is_array($key)) {
             array_walk($key, function($item) {
@@ -62,7 +62,7 @@ class RedisEngine implements DataEngine
         }
     }
 
-    public function get(string $key, ?string $member = null)
+    public function get(string $key, $member = null)
     {
         if(! empty($member) || is_numeric($member)) {
             return $this->connection->zscore($this->prefix.$key, $member);
@@ -71,7 +71,7 @@ class RedisEngine implements DataEngine
         }
     }
 
-    public function set(string $key, $value, ?string $member = null): bool
+    public function set(string $key, $value, $member = null): bool
     {
         if(! empty($member) || is_numeric($member)) {
             return $this->connection->zAdd($this->prefix.$key, $value, $member) > 0;
@@ -108,7 +108,7 @@ class RedisEngine implements DataEngine
     {
         $range = $orderByAsc ? 'zrange' : 'zrevrange';
 
-        return $this->connection->$range($this->prefix.$key, 0, $limit,  $this->isPHPRedis ? $withValues : ['withscores' => $withValues]);
+        return $this->connection->$range($this->prefix.$key, 0, $limit,  $this->isPHPRedis ? $withValues : ['withscores' => $withValues]) ?: [];
     }
 
     public function exists(string $key): bool

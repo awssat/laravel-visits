@@ -2,6 +2,7 @@
 
 namespace Awssat\Visits;
 
+use Awssat\Visits\Models\Visit;
 use Awssat\Visits\Traits\{Lists, Periods, Record, Setters};
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -64,30 +65,37 @@ class Visits
     public $globalIgnore = [];
 
     /**
+     * @var array
+     */
+    public $config = [];
+
+    /**
      * @param \Illuminate\Database\Eloquent\Model $subject any model
      * @param string $tag use only if you want to use visits on multiple models
      */
     public function __construct($subject = null, $tag = 'visits')
     {
-        $config = config('visits');
+        $this->config = config('visits');
 
-        $this->connection = $this->determineConnection($config['engine'] ?? 'redis')
-                                ->connect($config['connection'])
-                                ->setPrefix($config['keys_prefix'] ?? $config['redis_keys_prefix'] ?? 'visits');
+        $this->connection = $this->determineConnection($this->config['engine'] ?? 'redis')
+                                ->connect($this->config['connection'])
+                                ->setPrefix($this->config['keys_prefix'] ?? $this->config['redis_keys_prefix'] ?? 'visits');
 
         if(! $this->connection) {
             return;
         }
 
-        $this->periods = $config['periods'];
-        $this->ipSeconds = $config['remember_ip'];
-        $this->fresh = $config['always_fresh'];
-        $this->ignoreCrawlers = $config['ignore_crawlers'];
-        $this->globalIgnore = $config['global_ignore'];
+        $this->periods = $this->config['periods'];
+        $this->ipSeconds = $this->config['remember_ip'];
+        $this->fresh = $this->config['always_fresh'];
+        $this->ignoreCrawlers = $this->config['ignore_crawlers'];
+        $this->globalIgnore = $this->config['global_ignore'];
         $this->subject = $subject;
         $this->keys = new Keys($subject, preg_replace('/[^a-z0-9_]/i', '', $tag));
 
-        $this->periodsSync();
+        if (! empty($this->keys->id)) {
+            $this->periodsSync();
+        }
     }
 
     protected function determineConnection($name)
@@ -200,6 +208,7 @@ class Visits
     public function increment($inc = 1, $force = false, $ignore = [])
     {
         if ($force || (!$this->isCrawler() && !$this->recordedIp())) {
+   
             $this->connection->increment($this->keys->visits, $inc, $this->keys->id);
             $this->connection->increment($this->keys->visitsTotal(), $inc);
 
@@ -261,5 +270,16 @@ class Visits
     {
         $periodKey = $this->keys->period($period);
         return $this->connection->setExpiration($periodKey, $time);
+    }
+
+    /**
+     * To be used with models to integrate relationship with visits model.
+     * @return \Illuminate\Database\Eloquent\Relations\Relation 
+     */
+    public function relation()
+    {
+        $prefix = $this->config['keys_prefix'] ?? $this->config['redis_keys_prefix'] ?? 'visits';
+        
+        return $this->subject->hasOne(Visit::class, 'secondary_key')->where('primary_key', $prefix.':'.$this->keys->visits);
     }
 }

@@ -24,7 +24,7 @@ class EloquentEngine implements DataEngine
         return $this;
     }
 
-    public function increment(string $key, int $value, ?string $member = null): bool
+    public function increment(string $key, int $value, $member = null): bool
     {
         if (! empty($member) || is_numeric($member)) {
             $row = $this->model->firstOrNew(['primary_key' => $this->prefix.$key, 'secondary_key' => $member]);
@@ -42,12 +42,12 @@ class EloquentEngine implements DataEngine
         return $row->save();
     }
 
-    public function decrement(string $key, int $value, ?string $member = null): bool
+    public function decrement(string $key, int $value, $member = null): bool
     {
         return $this->increment($key, -$value, $member);
     }
 
-    public function delete($key, ?string $member = null): bool
+    public function delete($key, $member = null): bool
     {
         if(is_array($key)) {
             array_walk($key, function($item) {
@@ -63,7 +63,7 @@ class EloquentEngine implements DataEngine
         }
     }
 
-    public function get(string $key, ?string $member = null)
+    public function get(string $key, $member = null)
     {
         if(! empty($member) || is_numeric($member)) {
              return $this->model->where(['primary_key' => $this->prefix.$key, 'secondary_key' => $member])
@@ -80,16 +80,16 @@ class EloquentEngine implements DataEngine
         }
     }
 
-    public function set(string $key, $value, ?string $member = null): bool
+    public function set(string $key, $value, $member = null): bool
     {
         if(! empty($member) || is_numeric($member)) {
-            return $this->model->create([
+            return $this->model->updateOrCreate([
                 'primary_key' => $this->prefix.$key, 
                 'secondary_key' => $member,
                 'score' => $value,
                 ]) instanceof Model;
         } else {
-            return $this->model->create([
+            return $this->model->updateOrCreate([
                 'primary_key' => $this->prefix.$key, 
                 'score' => $value,
                 ]) instanceof Model;

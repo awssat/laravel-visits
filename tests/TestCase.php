@@ -84,6 +84,8 @@ abstract class TestCase extends BaseTestCase
             'driver' => 'sqlite',
             'database' => ':memory:',
         ]);
+        $app['config']->set('visits.global_ignore', []);
+
     }
     /**
      * Run migrations for tables used for testing purposes.

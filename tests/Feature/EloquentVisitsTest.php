@@ -3,7 +3,6 @@
 namespace Awssat\Visits\Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Redis;
 
 class EloquentVisitsTest extends VisitsTestCase
 {
