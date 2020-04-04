@@ -9,10 +9,12 @@ class RedisEngine implements DataEngine
     private $redis = null;
     private $connection = null;
     private $prefix = null;
+    private $isPHPRedis = true;
 
     public function __construct(Factory $redis)
     {
         $this->redis = $redis;
+        $this->isPHPRedis = strtolower(config('database.redis.client', 'phpredis')) === 'phpredis';
     }
 
     public function connect(string $connection): DataEngine
@@ -106,7 +108,7 @@ class RedisEngine implements DataEngine
     {
         $range = $orderByAsc ? 'zrange' : 'zrevrange';
 
-        return $this->connection->$range($this->prefix.$key, 0, $limit,  ['withscores' => $withValues]);
+        return $this->connection->$range($this->prefix.$key, 0, $limit,  $this->isPHPRedis ? $withValues : ['withscores' => $withValues]);
     }
 
     public function exists(string $key): bool
