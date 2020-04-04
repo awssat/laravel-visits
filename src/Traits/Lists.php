@@ -10,12 +10,18 @@ trait Lists
      * Fetch all time trending subjects.
      *
      * @param int $limit
-     * @param bool $isLow
+     * @param array $constraints optional. filter models by attributes (where=[...])
      * @return \Illuminate\Support\Collection|array
      */
-    public function top($limit = 5, $orderByAsc = false)
+    public function top($limit = 5, $orderByAsc = false, $constraints = [])
     {
-        $cacheKey = $this->keys->cache($limit, $orderByAsc);
+        if(is_array($orderByAsc)) {
+            $constraints = $orderByAsc;
+            $orderByAsc = false;
+        }
+
+        $cacheKey = $this->keys->cache($limit, $orderByAsc, $constraints);
+
         $cachedList = $this->cachedList($limit, $cacheKey);
         $visitsIds = $this->getVisitsIds($limit, $this->keys->visits, $orderByAsc);
 
@@ -23,7 +29,7 @@ trait Lists
             return $cachedList;
         }
 
-        return $this->freshList($cacheKey, $visitsIds);
+        return $this->freshList($cacheKey, $visitsIds, $constraints);
     }
 
 
@@ -69,11 +75,12 @@ trait Lists
      * Fetch lowest subjects.
      *
      * @param int $limit
+     * @param array $constraints optional
      * @return \Illuminate\Support\Collection|array
      */
-    public function low($limit = 5)
+    public function low($limit = 5, $constraints = [])
     {
-        return $this->top($limit, true);
+        return $this->top($limit, true, $constraints);
     }
 
 
@@ -95,13 +102,16 @@ trait Lists
      * @param $visitsIds
      * @return mixed
      */
-    protected function freshList($cacheKey, $visitsIds)
+    protected function freshList($cacheKey, $visitsIds, $constraints = [])
     {
         if (count($visitsIds)) {
 
             $this->connection->delete($cacheKey);
 
             return ($this->subject)::whereIn($this->keys->primary, $visitsIds)
+                ->when(count($constraints), function($query) use($constraints) {
+                    return $query->where($constraints);
+                })
                 ->get()
                 ->sortBy(function ($subject) use ($visitsIds) {
                     return array_search($subject->{$this->keys->primary}, $visitsIds);

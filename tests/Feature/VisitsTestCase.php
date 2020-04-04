@@ -441,4 +441,19 @@ abstract class VisitsTestCase extends TestCase
 
         $this->assertNotEquals($fresh2->first(), $cached->first());
     }
+
+    /**
+     * @test
+     */
+    public function it_list_filtered_by_constraints()
+    {
+        $posts =[];
+
+        foreach (['naji', 'fadi', 'hanadi', 'maghi', 'lafi'] as $player) {
+            $posts[$player] = Post::create(['name' => $player])->fresh();
+            visits($posts[$player])->forceIncrement(rand(2, 109));
+        }
+ 
+        $this->assertNotEquals(visits('Awssat\Visits\Tests\Post')->top(5, ['name' => 'naji']), [$posts['naji']]);
+    }
 }
