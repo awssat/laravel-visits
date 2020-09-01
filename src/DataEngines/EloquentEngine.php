@@ -195,7 +195,7 @@ class EloquentEngine implements DataEngine
 
          return $this->model->where(['primary_key' => $this->prefix.$key])
                             ->where(function($q) {
-                                return $q->where('expired_at', '>', \Carbon\Carbon::now())->orWhereNull('expired_at');
+                                return $q->where('expired_at', '<', \Carbon\Carbon::now())->orWhereNull('expired_at');
                             })
                             ->update([
                                 'expired_at' => $time
