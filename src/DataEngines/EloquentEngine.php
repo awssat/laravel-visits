@@ -160,7 +160,6 @@ class EloquentEngine implements DataEngine
                             ->where(function($q) {
                                 return $q->where('expired_at', '>', \Carbon\Carbon::now())->orWhereNull('expired_at');
                             })
-                            // ->where('score', '>', 0)
                             ->whereNotNull('secondary_key')
                             ->orderBy('score', $orderByAsc ? 'asc' : 'desc')
                             ->when($limit > -1, function($q) use($limit) {
@@ -193,8 +192,6 @@ class EloquentEngine implements DataEngine
 
     public function setExpiration(string $key, int $time): bool
     {
-        // $time = \Carbon\Carbon::now()->addSeconds($time);
-
          return $this->model->where(['primary_key' => $this->prefix.$key])
                                 ->where(function($q) {
                                     return $q->where('expired_at', '>', \Carbon\Carbon::now())->orWhereNull('expired_at');

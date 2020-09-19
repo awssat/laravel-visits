@@ -57,6 +57,15 @@ trait Record
      */
     public function getVisitorCountry()
     {
+        //In case of using unsupported cache driver. Although 'country' is globally  
+        //ignored already, we can not rely on user awareness of geoIP package restriction.
+        if (
+            in_array(config('cache.default'),  ['file', 'dynamodb', 'database']) &&
+            is_array($geoipTags = config('geoip.cache_tags')) && count($geoipTags) > 0
+        ) {
+            return null;
+        }
+
         return strtolower(geoip()->getLocation()->iso_code);
     }
 
