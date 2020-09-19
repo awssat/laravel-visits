@@ -66,7 +66,7 @@ class Keys
         }
 
         //it might not be that unique but it does the job since not many lists
-        //will be generated to one key.eloquent
+        //will be generated to one key.
         $constraintsPart = count($constraints) ? ':'.substr(sha1(serialize($constraints)), 0, 7) : '';
 
         return "{$key}:".($isLow ? 'low' : 'top').$constraintsPart.$limit;

@@ -87,11 +87,13 @@ class EloquentEngine implements DataEngine
                 'primary_key' => $this->prefix.$key, 
                 'secondary_key' => $member,
                 'score' => $value,
+                'expired_at' => null,
                 ]) instanceof Model;
         } else {
             return $this->model->updateOrCreate([
                 'primary_key' => $this->prefix.$key, 
                 'score' => $value,
+                'expired_at' => null,
                 ]) instanceof Model;
         }
     }
@@ -191,14 +193,14 @@ class EloquentEngine implements DataEngine
 
     public function setExpiration(string $key, int $time): bool
     {
-        $time = \Carbon\Carbon::now()->addSeconds($time);
+        // $time = \Carbon\Carbon::now()->addSeconds($time);
 
          return $this->model->where(['primary_key' => $this->prefix.$key])
-                            ->where(function($q) {
-                                return $q->where('expired_at', '>', \Carbon\Carbon::now())->orWhereNull('expired_at');
-                            })
+                                ->where(function($q) {
+                                    return $q->where('expired_at', '>', \Carbon\Carbon::now())->orWhereNull('expired_at');
+                                })
                             ->update([
-                                'expired_at' => $time
+                                'expired_at' => \Carbon\Carbon::now()->addSeconds($time)
                             ]);
     }
 }

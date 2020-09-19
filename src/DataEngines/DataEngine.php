@@ -14,7 +14,7 @@ Interface DataEngine
     public function get(string $key, $member = null);
     public function set(string $key, $value, $member = null): bool;
 
-    public function flatList(string $key, int $limit): array;
+    public function flatList(string $key, int $limit = -1): array;
     public function addToFlatList(string $key, $value): bool;
     public function search(string $word, bool $noPrefix = true): array;
     public function valueList(string $search, int $limit = -1, bool $orderByAsc = false, bool $withValues = false): array;
