@@ -19,6 +19,10 @@ jobs:
                         testbench: 5.*
                     -   laravel: 6.*
                         testbench: 4.*
+                exclude:
+                    # excludes laravel 6 on php8
+                    -   php: 8.0
+                        laravel: [6.*,7.*]
 
         name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency-version }}
 
