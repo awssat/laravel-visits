@@ -21,7 +21,7 @@ Where:
 ## Tags
 - You can track multiple kinds of visits to a single model using the tags as 
 ```php
-visits($model,'tag1')->increment()
+visits($model,'tag1')->increment();
 ```
 
 
