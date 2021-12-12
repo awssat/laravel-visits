@@ -72,9 +72,9 @@ Post::with('visits')->get();
 ---
 
 <p align="left">
-  Prev:  <a href="docs/3_installation">< Installation</a> 
+  Prev:  <a href="3_installation.md">< Installation</a> 
 </p>
 
 <p align="right">
-  Next:  <a href="docs/5_increments-and-decrementst">Increments and decrements ></a> 
+  Next:  <a href="5_increments-and-decrementst.md">Increments and decrements ></a> 
 </p>

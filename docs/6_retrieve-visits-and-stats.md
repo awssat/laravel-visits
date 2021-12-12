@@ -57,9 +57,9 @@ visits($post)->languages();
 ---
 
 <p align="left">
-  Prev:  <a href="docs/5_increments-and-decrements">< Increments and decrements</a> 
+  Prev:  <a href="5_increments-and-decrements.md">< Increments and decrements</a> 
 </p>
 
 <p align="right">
-  Next:  <a href="docs/7_visits-lists">Visits lists ></a> 
+  Next:  <a href="7_visits-lists.md">Visits lists ></a> 
 </p>

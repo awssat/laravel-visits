@@ -87,7 +87,7 @@ Currently only applies when using Redis as data engine. Check [Redis Configurati
 
 By default, Visits of `day`, `week`, `month`, and `year` are recorded. But you can add or remove any of them as you like.
 
-> **Note** supported periods can be found in [periods-options](8_clear-and-reset-values.html#periods-options)
+> **Note** supported periods can be found in [periods-options](8_clear-and-reset-values.html#periods-options.md)
 
 > You can add `periods` to global_ignore setting to skip recording any of these periods.
 
@@ -113,7 +113,7 @@ Every distinct IP will only be recorded as one visit every 15 min (default).
 'always_fresh' => false,
 ```
 
-## If you set this to `true`, then any [Visits Lists](7_visits-lists) won't be cached any will return a new generated list.
+## If you set this to `true`, then any [Visits Lists](7_visits-lists.md) won't be cached any will return a new generated list.
 
 ## We don't recommend enabling this feature as it's not good for performance.
 
@@ -136,9 +136,9 @@ By default, 'country', 'refer', 'periods', 'operatingSystem', and 'language' of 
 ---
 
 <p align="left">
-  Prev:  <a href="docs/2_requirements">< Requirements</a> 
+  Prev:  <a href="2_requirements.md">< Requirements</a> 
 </p>
 
 <p align="right">
-  Next:  <a href="docs/4_quick-start">Quick start ></a> 
+  Next:  <a href="4_quick-start.md">Quick start ></a> 
 </p>

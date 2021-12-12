@@ -69,5 +69,5 @@ visits('App\Post')->reset('factory');
 ---
 
 <p align="left">
-  Prev:  <a href="docs/7_visits-lists">< Visits-lists</a> 
+  Prev:  <a href="7_visits-lists.md">< Visits-lists</a> 
 </p>

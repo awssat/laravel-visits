@@ -15,5 +15,5 @@ Laravel Visits is a counter that can be attached to any model to track its visit
 ---
 
 <p align="right">
-  Next:  <a href="docs/2_requirements">Requirements ></a> 
+  Next:  <a href="2_requirements.md">Requirements ></a> 
 </p>

@@ -65,9 +65,9 @@ or you can ignore it permanently from config/visits.php
 ---
 
 <p align="left">
-  Prev:  <a href="docs/4_quick-start">< Quick start</a> 
+  Prev:  <a href="4_quick-start.md">< Quick start</a> 
 </p>
 
 <p align="right">
-  Next:  <a href="docs/6_retrieve-visits-and-stats">Retrieve visits and Stats ></a> 
+  Next:  <a href="6_retrieve-visits-and-stats.md">Retrieve visits and Stats ></a> 
 </p>

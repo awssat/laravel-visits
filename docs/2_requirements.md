@@ -19,9 +19,9 @@ Laravel visits uses any database that Eloquent uses.
 ---
 
 <p align="left">
-  Prev:  <a href="docs/1_introduction">< Iintroduction</a> 
+  Prev:  <a href="1_introduction.md">< Iintroduction</a> 
 </p>
 
 <p align="right">
-  Next:  <a href="docs/3_installation">Installation ></a> 
+  Next:  <a href="3_installation.md">Installation ></a> 
 </p>

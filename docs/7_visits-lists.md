@@ -40,14 +40,14 @@ visits('App\Post')->fresh()->top(10);
 visits('App\Post')->period('month')->top(10);
 ```
 
-> **Note** supported periods can be found in [periods-options](8_clear-and-reset-values.html#periods-options)
+> **Note** supported periods can be found in [periods-options](8_clear-and-reset-values.md#periods-options)
 
 ---
 
 <p align="left">
-  Prev:  <a href="docs/6_retrieve-visits-and-stats">< Retrieve visits and stats</a> 
+  Prev:  <a href="6_retrieve-visits-and-stats.md">< Retrieve visits and stats</a> 
 </p>
 
 <p align="right">
-  Next:  <a href="docs/8_clear-and-reset-values">Clear and reset values ></a> 
+  Next:  <a href="8_clear-and-reset-values.md">Clear and reset values ></a> 
 </p>
