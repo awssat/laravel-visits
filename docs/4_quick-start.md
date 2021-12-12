@@ -1,12 +1,7 @@
----
-prev: 3_installation
-next: 5_increments-and-decrements
----
-
-
 # Quick Start
 
 ## Start using it
+
 It's simple.
 
 Using `visits` helper as:
@@ -14,16 +9,19 @@ Using `visits` helper as:
 ```php
 visits($model)->{method}()
 ```
+
 Where:
-- **$model**: is any Eloquent model from your project.
-- **{method}**: any method that is supported by this library, and they are documented below.
+
+-   **$model**: is any Eloquent model from your project.
+-   **{method}**: any method that is supported by this library, and they are documented below.
 
 ## Tags
-- You can track multiple kinds of visits to a single model using the tags as 
+
+-   You can track multiple kinds of visits to a single model using the tags as
+
 ```php
 visits($model,'tag1')->increment()
 ```
-
 
 ## Integration with any model
 
@@ -50,8 +48,8 @@ $post->vzt()->increment();
 $post->vzt()->count();
 ```
 
-
 ## Relationship with models (only for Eloquent engine)
+
 If you are using visits with eloquent as engine (from config/visits.php; engine => 'eloquent') then you can add a relationship method to your models.
 
 ```php
@@ -68,5 +66,15 @@ class Post extends Model
 
 //then:
 
-Post::with('visits')->get(); 
+Post::with('visits')->get();
 ```
+
+---
+
+<p align="left">
+  Prev:  <a href="docs/3_installation">< Installation</a> 
+</p>
+
+<p align="right">
+  Next:  <a href="docs/5_increments-and-decrementst">Increments and decrements ></a> 
+</p>
