@@ -9,10 +9,12 @@ jobs:
         strategy:
             fail-fast: true
             matrix:
-                php: [7.3, 7.4, 8.0]
-                laravel: [6.*, 7.*, 8.*]
+                php: [7.3, 7.4, 8.0, 8.1]
+                laravel: [6.*, 7.*, 8.*, 9.*]
                 dependency-version: [prefer-lowest, prefer-stable]
                 include:
+                    -   laravel: 9.*
+                        testbench: 7.*
                     -   laravel: 8.*
                         testbench: 6.*
                     -   laravel: 7.*
@@ -20,6 +22,11 @@ jobs:
                     -   laravel: 6.*
                         testbench: 4.*
                 exclude:
+                    # excludes laravel 6+7 on php8.1
+                    -   php: 8.1
+                        laravel: 6.*
+                    -   php: 8.1
+                        laravel: 7.*
                     # excludes laravel 6+7 on php8
                     -   php: 8.0
                         laravel: 6.*
@@ -30,7 +37,7 @@ jobs:
 
         steps:
             -   name: Checkout code
-                uses: actions/checkout@v1
+                uses: actions/checkout@v2
 
             -   name: Install SQLite 3
                 run: |
@@ -38,7 +45,7 @@ jobs:
                     sudo apt-get install sqlite3
                     sudo apt-get install redis
             -   name: Cache dependencies
-                uses: actions/cache@v1
+                uses: actions/cache@v2
                 with:
                     path: ~/.composer/cache/files
                     key: dependencies-laravel-${{ matrix.laravel }}-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
