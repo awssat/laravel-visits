@@ -32,7 +32,7 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         $this->app['config']->set('geoip', array_merge(require __DIR__ . '/../vendor/torann/geoip/config/geoip.php'));
-        $this->app['router']->get('/')->middleware(CaptureReferer::class, function () {
+        $this->app['router']->middleware(CaptureReferer::class)->get('/', function () {
             return response(null, 200);
         });
         $this->session = $this->app['session.store'];
