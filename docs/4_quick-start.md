@@ -76,5 +76,5 @@ Post::with('visits')->get();
 </p>
 
 <p align="right">
-  Next:  <a href="5_increments-and-decrementst.md">Increments and decrements ></a> 
+  Next:  <a href="5_increments-and-decrements.md">Increments and decrements ></a> 
 </p>
