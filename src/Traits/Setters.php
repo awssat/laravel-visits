@@ -2,6 +2,8 @@
 
 namespace Awssat\Visits\Traits;
 
+use Awssat\Visits\Exceptions\InvalidPeriod;
+
 trait Setters
 {
     /**
@@ -84,6 +86,8 @@ trait Setters
     {
         if (in_array($period, $this->periods)) {
             $this->keys->visits = $this->keys->period($period);
+        } else {
+            throw new InvalidPeriod($period);
         }
 
         return $this;
