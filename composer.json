@@ -3,7 +3,13 @@
     "type": "library",
     "description": "Laravel Redis visits counter for Eloquent models",
     "keywords": [
-        "Laravel", "Visits", "Counter", "Package",  "Redis",  "Cache",  "Php"
+        "Laravel",
+        "Visits",
+        "Counter",
+        "Package",
+        "Redis",
+        "Cache",
+        "Php"
     ],
     "homepage": "https://github.com/awssat/laravel-visits",
     "license": "MIT",
@@ -29,7 +35,7 @@
         "illuminate/support": "~5.5.0 || ~5.6.0 || ~5.7.0 || ~5.8.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0",
         "mockery/mockery": "^1.4 || ^2.0",
         "orchestra/testbench": "^3.5 || ^3.6 || ^3.7 || ^3.8 || ^4.0 || ^5.0 || ^6.0 || ^7.0",
-        "phpunit/phpunit": "^9.3",
+        "phpunit/phpunit": "^9.0",
         "predis/predis": "^1.1"
     },
     "suggest": {

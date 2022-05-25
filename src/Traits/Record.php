@@ -11,7 +11,7 @@ trait Record
      */
     protected function recordCountry($inc)
     {
-        $this->connection->increment($this->keys->visits."_countries:{$this->keys->id}", $inc, $this->getVisitorCountry());
+        $this->connection->increment($this->keys->visits . "_countries:{$this->keys->id}", $inc, $this->getVisitorCountry());
     }
 
     /**
@@ -19,7 +19,7 @@ trait Record
      */
     protected function recordRefer($inc)
     {
-        $this->connection->increment($this->keys->visits."_referers:{$this->keys->id}", $inc, $this->getVisitorReferer());
+        $this->connection->increment($this->keys->visits . "_referers:{$this->keys->id}", $inc, $this->getVisitorReferer());
     }
 
     /**
@@ -27,7 +27,7 @@ trait Record
      */
     protected function recordOperatingSystem($inc)
     {
-        $this->connection->increment($this->keys->visits."_OSes:{$this->keys->id}", $inc, $this->getVisitorOperatingSystem());
+        $this->connection->increment($this->keys->visits . "_OSes:{$this->keys->id}", $inc, $this->getVisitorOperatingSystem());
     }
 
     /**
@@ -35,7 +35,7 @@ trait Record
      */
     protected function recordLanguage($inc)
     {
-        $this->connection->increment($this->keys->visits."_languages:{$this->keys->id}", $inc, $this->getVisitorLanguage());
+        $this->connection->increment($this->keys->visits . "_languages:{$this->keys->id}", $inc, $this->getVisitorLanguage());
     }
 
     /**
@@ -47,7 +47,7 @@ trait Record
             $periodKey = $this->keys->period($period);
 
             $this->connection->increment($periodKey, $inc, $this->keys->id);
-            $this->connection->increment($periodKey.'_total', $inc);
+            $this->connection->increment($periodKey . '_total', $inc);
         }
     }
 
@@ -63,7 +63,7 @@ trait Record
             in_array(config('cache.default'),  ['file', 'dynamodb', 'database']) &&
             is_array($geoipTags = config('geoip.cache_tags')) && count($geoipTags) > 0
         ) {
-            return null;
+            return 'zz';
         }
 
         return strtolower(geoip()->getLocation()->iso_code);
@@ -76,15 +76,15 @@ trait Record
     public function getVisitorOperatingSystem()
     {
         $osArray = [
-        '/windows|win32|win16|win95/i' => 'Windows',
-        '/iphone/i' => 'iPhone',
-        '/ipad/i' => 'iPad',
-        '/macintosh|mac os x|mac_powerpc/i' => 'MacOS',
-        '/(?=.*mobile)android/i' => 'AndroidMobile',
-        '/(?!.*mobile)android/i' => 'AndroidTablet',
-        '/android/i' => 'Android',
-        '/blackberry/i' => 'BlackBerry',
-        '/linux/i' => 'Linux',
+            '/windows|win32|win16|win95/i' => 'Windows',
+            '/iphone/i' => 'iPhone',
+            '/ipad/i' => 'iPad',
+            '/macintosh|mac os x|mac_powerpc/i' => 'MacOS',
+            '/(?=.*mobile)android/i' => 'AndroidMobile',
+            '/(?!.*mobile)android/i' => 'AndroidTablet',
+            '/android/i' => 'Android',
+            '/blackberry/i' => 'BlackBerry',
+            '/linux/i' => 'Linux',
         ];
 
         foreach ($osArray as $regex => $value) {
@@ -115,6 +115,6 @@ trait Record
      */
     public function getVisitorReferer()
     {
-        return app(Referer::class)->get();
+        return app(Referer::class)->get() ?? 'direct';
     }
 }
