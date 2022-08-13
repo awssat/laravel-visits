@@ -10,7 +10,7 @@ return [
     | Connection Name: see config/database.php 
     |
     */
-    'engine' => 'redis',
+    'engine' => \Awssat\Visits\DataEngines\RedisEngine::class,
     'connection' => 'laravel-visits',
 
 

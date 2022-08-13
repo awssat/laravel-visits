@@ -100,16 +100,7 @@ class Visits
 
     protected function determineConnection($name)
     {
-        $connections = [
-            'redis' => \Awssat\Visits\DataEngines\RedisEngine::class,
-            'eloquent' => \Awssat\Visits\DataEngines\EloquentEngine::class
-        ];
-
-        if(! array_key_exists($name, $connections)) {
-            throw new \Exception("(Laravel-Visits) The selected engine `{$name}` is not supported! Please correct this issue from config/visits.php.");
-        }
-
-        return app($connections[$name]);
+        return app($name);
     }
 
     /**
