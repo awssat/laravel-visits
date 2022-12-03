@@ -12,6 +12,20 @@ visits('App\Post')->top(10);
 visits('App\Post')->low(10);
 ```
 
+Top or Lowest list ids
+
+## Top/Lowest visited items Ids
+
+```php
+visits('App\Post')->topIds(10);
+```
+
+```php
+visits('App\Post')->lowIds(10);
+```
+
+
+
 ### Filter by model attributes
 
 You can get only some of the top/low models by query where clause. For example if Post model has `shares` & `likes` attributes you can filter the models like this:
