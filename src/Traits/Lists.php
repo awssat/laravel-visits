@@ -7,6 +7,26 @@ use Illuminate\Support\Collection;
 trait Lists
 {
     /**
+     * Fetch all time trending subjects Ids.
+     *
+     * @param int $limit
+     * @param array $constraints optional. filter models by attributes (where=[...])
+     * @return array
+     */
+    public function topIds($limit = 5, $orderByAsc = false, $constraints = [])
+    {
+        if(is_array($orderByAsc)) {
+            $constraints = $orderByAsc;
+            $orderByAsc = false;
+        }
+
+        $cacheKey = $this->keys->cache($limit, $orderByAsc, $constraints);
+
+        $cachedList = $this->cachedList($limit, $cacheKey);
+        return $this->getVisitsIds($limit, $this->keys->visits, $orderByAsc);
+    }
+    
+    /**
      * Fetch all time trending subjects.
      *
      * @param int $limit
@@ -71,6 +91,19 @@ trait Lists
         return $this->connection->valueList($this->keys->visits . "_{$name}:{$this->keys->id}", $limit, $orderByAsc, $withValues);
     }
 
+    
+    /**
+     * Fetch lowest subjects Ids.
+     *
+     * @param int $limit
+     * @param array $constraints optional
+     * @return array
+     */
+    public function lowIds($limit = 5, $constraints = [])
+    {
+        return $this->topIds($limit, true, $constraints);
+    }
+    
     /**
      * Fetch lowest subjects.
      *
