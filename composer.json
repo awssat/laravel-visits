@@ -25,7 +25,7 @@
     ],
     "require": {
         "php": "^7.3 || ^8.0",
-        "illuminate/support": "~5.5.0 || ~5.6.0 || ~5.7.0 || ~5.8.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0",
+        "illuminate/support": "~5.5.0 || ~5.6.0 || ~5.7.0 || ~5.8.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0|^10.0",
         "jaybizzle/crawler-detect": "^1.2",
         "spatie/laravel-referer": "^1.6",
         "torann/geoip": "^1.0|^3.0"
@@ -34,9 +34,9 @@
         "doctrine/dbal": "^2.6|^3.0",
         "illuminate/support": "~5.5.0 || ~5.6.0 || ~5.7.0 || ~5.8.0 || ^6.0 || ^7.0 || ^8.0 || ^9.0",
         "mockery/mockery": "^1.4 || ^2.0",
-        "orchestra/testbench": "^3.5 || ^3.6 || ^3.7 || ^3.8 || ^4.0 || ^5.0 || ^6.0 || ^7.0",
+        "orchestra/testbench": "^3.5 || ^3.6 || ^3.7 || ^3.8 || ^4.0 || ^5.0 || ^6.0 || ^7.0|^8.0",
         "phpunit/phpunit": "^9.0",
-        "predis/predis": "^1.1"
+        "predis/predis": "^1.1|^2.1"
     },
     "suggest": {
         "predis/predis": "Needed if you are using redis as data engine of laravel-visits",
