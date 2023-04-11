@@ -63,8 +63,8 @@ Laravel Visits can be configured to act the way you like, `config/visits.php` is
 'engine' => \Awssat\Visits\DataEngines\RedisEngine::class,
 ```
 
-Suported data engines are `\Awssat\Visits\DataEngines\RedisEngine::class`, and `eloquent` currently.
-If you use ` \Awssat\Visits\DataEngines\EloquentEngine::class` then data will be stored in the default database (MySQL, SQLite or the one you are using)
+Suported data engines are `\Awssat\Visits\DataEngines\RedisEngine::class`, and `\Awssat\Visits\DataEngines\EloquentEngine::class` currently.
+If you use `\Awssat\Visits\DataEngines\EloquentEngine::class` then data will be stored in the default database (MySQL, SQLite or the one you are using)
 
 #### connection
 

@@ -4,6 +4,7 @@ namespace Awssat\Visits\Commands;
 
 use Awssat\Visits\Models\Visit;
 use Illuminate\Console\Command;
+use Awssat\Visits\DataEngines\EloquentEngine;
 
 class CleanCommand extends Command
 {
@@ -20,7 +21,7 @@ class CleanCommand extends Command
     {
         $currentEngine = config('visits.engine') ?? '';
 
-        if($currentEngine == 'eloquent') {
+        if($currentEngine == EloquentEngine::class) {
             $this->cleanEloquent();
         }
     }
