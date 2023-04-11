@@ -6,7 +6,7 @@ return [
     | Database Engine & Connection Name
     |--------------------------------------------------------------------------
     |
-    | Supported Engines: "redis", "eloquent"
+    | Supported Engines: \Awssat\Visits\DataEngines\RedisEngine::class, "eloquent"
     | Connection Name: see config/database.php 
     |
     */
