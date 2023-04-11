@@ -21,7 +21,7 @@ class CleanCommand extends Command
     {
         $currentEngine = config('visits.engine') ?? '';
 
-        if($currentEngine == EloquentEngine::class) {
+        if($currentEngine == EloquentEngine::class || is_subclass_of($currentEngine, EloquentEngine::class)) {
             $this->cleanEloquent();
         }
     }
