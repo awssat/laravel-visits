@@ -50,7 +50,7 @@ $post->vzt()->count();
 
 ## Relationship with models (only for Eloquent engine)
 
-If you are using visits with eloquent as engine (from config/visits.php; engine => 'eloquent') then you can add a relationship method to your models.
+If you are using visits with eloquent as engine (from config/visits.php; engine => \Awssat\Visits\DataEngines\EloquentEngine::class) then you can add a relationship method to your models.
 
 ```php
 class Post extends Model
