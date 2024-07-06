@@ -29,7 +29,7 @@
         "jaybizzle/crawler-detect": "^1.2",
         "spatie/laravel-referer": "^1.6",
         "torann/geoip": "^1.0|^3.0",
-        "nesbot/carbon": "^2.0"
+        "nesbot/carbon": "^2.0 || ^3.0"
     },
     "require-dev": {
         "doctrine/dbal": "^2.6|^3.0",
