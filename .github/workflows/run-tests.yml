@@ -9,31 +9,20 @@ jobs:
         strategy:
             fail-fast: false
             matrix:
-                php: [8.0, 8.1]
-                laravel: [8.*, 9.*, 10.*]
+                php: [8.1, 8.2, 8.3]
+                laravel: [9.*, 10.*, 11.*]
                 dependency-version: [prefer-lowest, prefer-stable]
                 include:
+                    - laravel: 11.*
+                      testbench: 9.*
                     - laravel: 10.*
                       testbench: 8.*
                     - laravel: 9.*
                       testbench: 7.*
-                    - laravel: 8.*
-                      testbench: 6.*
                 exclude:
-                   # excludes laravel 10 on php7.4, php 8.0
-                    - php: 7.4
-                      laravel: 10.*
-                    - php: 8.0
-                      laravel: 10.*
-                    # excludes laravel 9 on php7.4
-                    - php: 7.4
-                      laravel: 9.*
-                    # excludes laravel 7 on php8
-                    - php: 8.0
-                      laravel: 7.*
-                    # excludes laravel 7+8 on php8.1
+                   # excludes laravel 11 on php 8.1
                     - php: 8.1
-                      laravel: 7.*
+                      laravel: 11.*
                     - php: 8.1
                       laravel: 8.*
 
@@ -46,8 +35,7 @@ jobs:
             - name: Install SQLite 3
               run: |
                   sudo apt-get update
-                  sudo apt-get install sqlite3
-                  sudo apt-get install redis
+                  sudo apt-get install sqlite3 redis
             - name: Cache dependencies
               uses: actions/cache@v2
               with:
