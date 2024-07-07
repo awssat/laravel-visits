@@ -190,7 +190,7 @@ class EloquentEngine implements DataEngine
         return $ttl <= 0 ? -1 : $ttl;
     }
 
-    public function setExpiration(string $key, int $time): bool
+    public function setExpiration(string $key, float $time): bool
     {
          return $this->model->where(['primary_key' => $this->prefix.$key])
                                 ->where(function($q) {
