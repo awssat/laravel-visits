@@ -115,11 +115,11 @@ class RedisEngine implements DataEngine
         return $this->connection->rpush($this->prefix . $key, $value) !== false;
     }
 
-    public function valueList(string $key, int $limit = -1, bool $orderByAsc = false, bool $withValues = false): array
+    public function valueList(string $search, int $limit = -1, bool $orderByAsc = false, bool $withValues = false): array
     {
         $range = $orderByAsc ? 'zrange' : 'zrevrange';
 
-        return $this->connection->$range($this->prefix . $key, 0, $limit,  $this->isPHPRedis ? $withValues : ['withscores' => $withValues]) ?: [];
+        return $this->connection->$range($this->prefix . $search, 0, $limit,  $this->isPHPRedis ? $withValues : ['withscores' => $withValues]) ?: [];
     }
 
     public function exists(string $key): bool
@@ -132,7 +132,7 @@ class RedisEngine implements DataEngine
         return $this->connection->ttl($this->prefix . $key);
     }
 
-    public function setExpiration(string $key, float $time): bool
+    public function setExpiration(string $key, int $time): bool
     {
         return $this->connection->expire($this->prefix . $key, $time);
     }

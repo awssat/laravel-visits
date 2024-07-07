@@ -92,10 +92,10 @@ class PeriodsTestCase extends TestCase
 
 
         //time until redis delete periods
-        $this->assertEquals(1, now()->addSeconds(visits($post)->period('day')->timeLeft())->diffInDays($time));
+        $this->assertEquals(1, (int) now()->addSeconds(visits($post)->period('day')->timeLeft())->diffInDays($time, true));
 
         //time until redis delete periods
-        $this->assertEquals(1, now()->addSeconds(visits('Awssat\Visits\Tests\Post')->period('day')->timeLeft())->diffInDays($time));
+        $this->assertEquals(1, (int) now()->addSeconds(visits('Awssat\Visits\Tests\Post')->period('day')->timeLeft())->diffInDays($time, true));
     }
 
     /** @test */

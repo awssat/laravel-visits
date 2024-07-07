@@ -27,5 +27,5 @@ Interface DataEngine
      */
     public function timeLeft(string $key): int;
 
-    public function setExpiration(string $key, float $time): bool;
+    public function setExpiration(string $key, int $time): bool;
 }

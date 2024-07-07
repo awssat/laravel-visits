@@ -154,9 +154,9 @@ class EloquentEngine implements DataEngine
         return (bool) $row->save();
     }
 
-    public function valueList(string $key, int $limit = -1, bool $orderByAsc = false, bool $withValues = false): array
+    public function valueList(string $search, int $limit = -1, bool $orderByAsc = false, bool $withValues = false): array
     {
-        $rows = $this->model->where('primary_key', $this->prefix.$key)
+        $rows = $this->model->where('primary_key', $this->prefix.$search)
                             ->where(function($q) {
                                 return $q->where('expired_at', '>', \Carbon\Carbon::now())->orWhereNull('expired_at');
                             })
@@ -190,7 +190,7 @@ class EloquentEngine implements DataEngine
         return $ttl <= 0 ? -1 : $ttl;
     }
 
-    public function setExpiration(string $key, float $time): bool
+    public function setExpiration(string $key, int $time): bool
     {
          return $this->model->where(['primary_key' => $this->prefix.$key])
                                 ->where(function($q) {
