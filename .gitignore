@@ -8,3 +8,4 @@ composer.lock
 /.vscode
 .phpunit.result.cache
 dump.rdb
+.phpunit.cache/test-results

@@ -39,7 +39,7 @@ trait Periods
             throw new Exception("Wrong period: `{$period}`! please update config/visits.php file.");
         }
 
-        return $periodCarbon->diffInSeconds() + 1;
+        return intval(abs($periodCarbon->diffInSeconds())) + 1;
     }
 
     /**
