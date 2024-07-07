@@ -132,7 +132,7 @@ class RedisEngine implements DataEngine
         return $this->connection->ttl($this->prefix . $key);
     }
 
-    public function setExpiration(string $key, int $time): bool
+    public function setExpiration(string $key, float $time): bool
     {
         return $this->connection->expire($this->prefix . $key, $time);
     }
