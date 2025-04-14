@@ -52,6 +52,13 @@ class VisitsServiceProvider extends ServiceProvider
             'visits'
         );
 
+        // Mock implementation
+        if ($this->app->environment('testing')) {
+            $this->mergeConfigFrom(
+                __DIR__.'/config/geoip.php',
+                'visits'
+            );
+        }
 
         // Register GeoIP service provider if not already registered
         if (!$this->app->providerIsLoaded(GeoIPServiceProvider::class)) {
@@ -62,19 +69,6 @@ class VisitsServiceProvider extends ServiceProvider
         $geoipAlias = $this->app->getAlias('GeoIP');
         if ($geoipAlias === null) {
             $this->app->alias('GeoIP', \Torann\GeoIP\Facades\GeoIP::class);
-        }
-
-        // Make sure GeoIP has a configuration
-        if (!file_exists(config_path('geoip.php'))) {
-            $this->publishes([
-                __DIR__.'/config/geoip.php' => config_path('geoip.php'),
-            ], 'config');
-            
-            // Force merge the config in the current request
-            $this->mergeConfigFrom(
-                __DIR__.'/config/geoip.php',
-                'geoip'
-            );
         }
 
         $this->app->bind('command.visits:clean', CleanCommand::class);
