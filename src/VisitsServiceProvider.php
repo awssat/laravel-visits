@@ -56,9 +56,9 @@ class VisitsServiceProvider extends ServiceProvider
         if (!$this->app->providerIsLoaded(GeoIPServiceProvider::class)) {
             $this->app->register(GeoIPServiceProvider::class);
         }
-        
+
         // Register GeoIP facade if not already registered
-        if (!isset($this->app->getAlias('GeoIP'))) {
+        if ($this->app->getAlias('GeoIP') === null) {
             $this->app->alias('GeoIP', \Torann\GeoIP\Facades\GeoIP::class);
         }
 
