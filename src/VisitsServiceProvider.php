@@ -68,7 +68,7 @@ class VisitsServiceProvider extends ServiceProvider
             $this->app->singleton('geoip', function () {
                 return new class {
                     public function getLocation() {
-                        return [
+                        return (object)[
                             'ip' => '127.0.0.0',
                             'iso_code' => 'US',
                             'country' => 'United States',
