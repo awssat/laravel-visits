@@ -52,14 +52,6 @@ class VisitsServiceProvider extends ServiceProvider
             'visits'
         );
 
-        // Mock implementation
-        if ($this->app->environment('testing')) {
-            $this->mergeConfigFrom(
-                __DIR__.'/config/geoip.php',
-                'visits'
-            );
-        }
-
         // Register GeoIP service provider if not already registered
         if (!$this->app->providerIsLoaded(GeoIPServiceProvider::class)) {
             $this->app->register(GeoIPServiceProvider::class);
@@ -69,6 +61,31 @@ class VisitsServiceProvider extends ServiceProvider
         $geoipAlias = $this->app->getAlias('GeoIP');
         if ($geoipAlias === null) {
             $this->app->alias('GeoIP', \Torann\GeoIP\Facades\GeoIP::class);
+        }
+
+        // For testing environments, use a mock implementation
+        if ($this->app->environment('testing')) {
+            $this->app->singleton('geoip', function () {
+                return new class {
+                    public function getLocation() {
+                        return [
+                            'ip' => '127.0.0.0',
+                            'iso_code' => 'US',
+                            'country' => 'United States',
+                            'city' => 'New Haven',
+                            'state' => 'CT',
+                            'state_name' => 'Connecticut',
+                            'postal_code' => '06510',
+                            'lat' => 41.31,
+                            'lon' => -72.92,
+                            'timezone' => 'America/New_York',
+                            'continent' => 'NA',
+                            'default' => true,
+                            'currency' => 'USD',
+                        ];
+                    }
+                };
+            });
         }
 
         $this->app->bind('command.visits:clean', CleanCommand::class);
