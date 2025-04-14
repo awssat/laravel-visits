@@ -5,6 +5,7 @@ namespace Awssat\Visits;
 use Awssat\Visits\Commands\CleanCommand;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
+use Torann\GeoIP\GeoIPServiceProvider;
 
 class VisitsServiceProvider extends ServiceProvider
 {
@@ -50,6 +51,16 @@ class VisitsServiceProvider extends ServiceProvider
             __DIR__.'/config/visits.php',
             'visits'
         );
+
+        // Register GeoIP service provider if not already registered
+        if (!$this->app->providerIsLoaded(GeoIPServiceProvider::class)) {
+            $this->app->register(GeoIPServiceProvider::class);
+        }
+        
+        // Register GeoIP facade if not already registered
+        if (!isset($this->app->getAlias('GeoIP'))) {
+            $this->app->alias('GeoIP', \Torann\GeoIP\Facades\GeoIP::class);
+        }
 
         $this->app->bind('command.visits:clean', CleanCommand::class);
 
