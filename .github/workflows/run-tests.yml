@@ -25,20 +25,21 @@ jobs:
                 #       laravel: 12.*
 
         name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.dependency-version }}
-
+        
+        
         steps:
             - name: Checkout code
-              uses: actions/checkout@v2
+              uses: actions/checkout@v1
 
             - name: Install SQLite 3
               run: |
                   sudo apt-get update
                   sudo apt-get install sqlite3 redis
             - name: Cache dependencies
-              uses: actions/cache@v2
+              uses: actions/cache@v1
               with:
-                  path: ~/.composer/cache/files
-                  key: dependencies-laravel-${{ matrix.laravel }}-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
+                path: ~/.composer/cache/files
+                key: dependencies-laravel-${{ matrix.laravel }}-php-${{ matrix.php }}-composer-${{ hashFiles('composer.json') }}
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
