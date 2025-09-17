@@ -32,6 +32,26 @@ composer require awssat/laravel-visits
 -   [Visits lists](docs/7_visits-lists.md)
 -   [Clear and reset values](docs/8_clear-and-reset-values.md)
 
+## Configuration
+
+You can publish the configuration file using the following command:
+
+```bash
+php artisan vendor:publish --provider="Awssat\Visits\VisitsServiceProvider" --tag="config"
+```
+
+This will create a `config/visits.php` file in your application. In this file, you can configure the behavior of the package.
+
+### `global_ignore`
+
+The `global_ignore` option allows you to prevent the recording of certain types of data. By default, no data is ignored. You can choose to ignore any of the following: `'country'`, `'refer'`, `'periods'`, `'operatingSystem'`, `'language'`.
+
+For example, to ignore country and language tracking, you would set the option like this:
+
+```php
+'global_ignore' => ['country', 'language'],
+```
+
 ## Changelog
 
 Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
