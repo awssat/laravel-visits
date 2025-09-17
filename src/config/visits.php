@@ -72,7 +72,7 @@ return [
     | stop recording specific items (can be any of these: 'country', 'refer', 'periods', 'operatingSystem', 'language')
     |
     */
-    'global_ignore' => [],
+    'global_ignore' => ['country'],
 
 ];
 

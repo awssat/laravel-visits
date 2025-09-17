@@ -456,4 +456,25 @@ abstract class VisitsTestCase extends TestCase
  
         $this->assertNotEquals(visits('Awssat\Visits\Tests\Post')->top(5, ['name' => 'naji']), [$posts['naji']]);
     }
+
+    /** @test */
+    public function it_can_increment_visits_for_multiple_tags()
+    {
+        $post = Post::create();
+
+        visits($post, ['tag1', 'tag2'])->each->increment();
+
+        $this->assertEquals(1, visits($post, 'tag1')->count());
+        $this->assertEquals(1, visits($post, 'tag2')->count());
+    }
+
+    /** @test */
+    public function it_can_increment_visits_for_a_single_tag()
+    {
+        $post = Post::create();
+
+        visits($post, 'tag1')->increment();
+
+        $this->assertEquals(1, visits($post, 'tag1')->count());
+    }
 }

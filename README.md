@@ -32,25 +32,15 @@ composer require awssat/laravel-visits
 -   [Visits lists](docs/7_visits-lists.md)
 -   [Clear and reset values](docs/8_clear-and-reset-values.md)
 
-## Configuration
+### Multiple Tags
 
-You can publish the configuration file using the following command:
-
-```bash
-php artisan vendor:publish --provider="Awssat\Visits\VisitsServiceProvider" --tag="config"
-```
-
-This will create a `config/visits.php` file in your application. In this file, you can configure the behavior of the package.
-
-### `global_ignore`
-
-The `global_ignore` option allows you to prevent the recording of certain types of data. By default, no data is ignored. You can choose to ignore any of the following: `'country'`, `'refer'`, `'periods'`, `'operatingSystem'`, `'language'`.
-
-For example, to ignore country and language tracking, you would set the option like this:
+You can now track visits for a specific eloquent model using multiple tags. To do so, pass an array of tags as the second argument to the `visits()` function.
 
 ```php
-'global_ignore' => ['country', 'language'],
+visits($blog, ['click', 'auth'])->each->increment();
 ```
+
+This will return a collection of `Visits` objects, which you can then iterate over to perform actions on each tag.
 
 ## Changelog
 
