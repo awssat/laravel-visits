@@ -154,6 +154,19 @@ class EloquentEngine implements DataEngine
         return (bool) $row->save();
     }
 
+public function getHistorical(string $key, $member = null)
+{
+    $query = $this->model->where(['primary_key' => $this->prefix.$key]);
+
+    if(! empty($member) || is_numeric($member)) {
+        $query->where('secondary_key', $member);
+    } else {
+        $query->whereNull('secondary_key');
+    }
+
+    return $query->value('score');
+}
+
     public function valueList(string $key, int $limit = -1, bool $orderByAsc = false, bool $withValues = false): array
     {
         $rows = $this->model->where('primary_key', $this->prefix.$key)

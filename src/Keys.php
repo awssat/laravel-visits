@@ -75,8 +75,11 @@ class Keys
     /**
      * period key
      */
-    public function period($period)
+    public function period($period, $date = null)
     {
+        if ($date) {
+            return "{$this->visits}_{$period}_" . $date->format('Y-m-d');
+        }
         return "{$this->visits}_{$period}";
     }
 

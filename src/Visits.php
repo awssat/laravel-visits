@@ -130,6 +130,27 @@ class Visits
         return new Reset($this, $method, $args);
     }
 
+    public function dailyVisits($from, $to)
+    {
+        if (! $this->connection instanceof \Awssat\Visits\DataEngines\EloquentEngine) {
+            throw new \Exception('The dailyVisits method is only supported by the EloquentEngine.');
+        }
+
+        $total = 0;
+        $period = new \DatePeriod(
+            \Carbon\Carbon::parse($from),
+            new \DateInterval('P1D'),
+            \Carbon\Carbon::parse($to)->endOfDay()
+        );
+
+        foreach ($period as $date) {
+            $key = $this->keys->period('day', $date);
+            $total += $this->connection->getHistorical($key, $this->keys->id) ?? 0;
+        }
+
+        return $total;
+    }
+
     /**
      * Check for the ip is has been recorded before
      * @return bool

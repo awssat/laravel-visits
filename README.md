@@ -32,15 +32,34 @@ composer require awssat/laravel-visits
 -   [Visits lists](docs/7_visits-lists.md)
 -   [Clear and reset values](docs/8_clear-and-reset-values.md)
 
-### Multiple Tags
+## Configuration
 
-You can now track visits for a specific eloquent model using multiple tags. To do so, pass an array of tags as the second argument to the `visits()` function.
+You can publish the configuration file using the following command:
 
-```php
-visits($blog, ['click', 'auth'])->each->increment();
+```bash
+php artisan vendor:publish --provider="Awssat\Visits\VisitsServiceProvider" --tag="config"
 ```
 
-This will return a collection of `Visits` objects, which you can then iterate over to perform actions on each tag.
+This will create a `config/visits.php` file in your application. In this file, you can configure the behavior of the package.
+
+### `global_ignore`
+
+The `global_ignore` option allows you to prevent the recording of certain types of data. By default, no data is ignored. You can choose to ignore any of the following: `'country'`, `'refer'`, `'periods'`, `'operatingSystem'`, `'language'`.
+
+For example, to ignore country and language tracking, you would set the option like this:
+
+```php
+'global_ignore' => ['country', 'language'],
+```
+
+### Getting Visits for a Date Range
+
+You can get the total visits for a specific date range using the `dailyVisits()` method. This method is only supported by the `EloquentEngine`.
+
+```php
+// Get the total visits for a post from 2023-01-01 to 2023-01-31
+$visits = visits($post)->dailyVisits('2023-01-01', '2023-01-31');
+```
 
 ## Changelog
 

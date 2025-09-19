@@ -34,4 +34,14 @@ class RedisPeriodsTest extends PeriodsTestCase
                             ->connect($this->app['config']['visits.connection'])
                             ->setPrefix($this->app['config']['visits.keys_prefix']);
     }
+
+    /** @test */
+    public function it_throws_an_exception_for_daily_visits_with_redis_engine()
+    {
+        $this->expectException(\Exception::class);
+
+        $post = \Awssat\Visits\Tests\Post::create();
+
+        visits($post)->dailyVisits('2023-01-01', '2023-01-02');
+    }
 }

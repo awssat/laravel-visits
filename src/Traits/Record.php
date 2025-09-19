@@ -44,8 +44,15 @@ trait Record
     protected function recordPeriods($inc)
     {
         foreach ($this->periods as $period) {
-            $periodKey = $this->keys->period($period);
+            if ($period == 'day') {
+                // record the dated key
+                $datedKey = $this->keys->period('day', \Carbon\Carbon::now());
+                $this->connection->increment($datedKey, $inc, $this->keys->id);
+                $this->connection->increment($datedKey . '_total', $inc);
+            }
 
+            // record the non-dated key for backward compatibility and current period counts
+            $periodKey = $this->keys->period($period);
             $this->connection->increment($periodKey, $inc, $this->keys->id);
             $this->connection->increment($periodKey . '_total', $inc);
         }
