@@ -32,6 +32,16 @@ composer require awssat/laravel-visits
 -   [Visits lists](docs/7_visits-lists.md)
 -   [Clear and reset values](docs/8_clear-and-reset-values.md)
 
+### Multiple Tags
+
+You can now track visits for a specific eloquent model using multiple tags. To do so, pass an array of tags as the second argument to the `visits()` function.
+
+```php
+visits($blog, ['click', 'auth'])->each->increment();
+```
+
+This will return a collection of `Visits` objects, which you can then iterate over to perform actions on each tag.
+
 ## Configuration
 
 You can publish the configuration file using the following command:
