@@ -42,6 +42,10 @@ class Visits
      */
     protected $language = null;
     /**
+     * @var null|string
+     */
+    protected $date = null;
+    /**
      * @var mixed
      */
     protected $periods;
@@ -160,6 +164,15 @@ class Visits
             return $this->connection->get($this->keys->visits."_OSes:{$this->keys->id}", $this->operatingSystem);
         } else if ($this->language) {
             return $this->connection->get($this->keys->visits."_languages:{$this->keys->id}", $this->language);
+        }
+
+        if ($this->date) {
+            $key = $this->keys->period('day') . '_daily_' . $this->date;
+            if ($this->keys->instanceOfModel) {
+                return intval($this->connection->get($key, $this->keys->id));
+            }
+
+            return intval($this->connection->get($key . '_total'));
         }
 
         return intval(

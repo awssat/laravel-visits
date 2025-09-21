@@ -92,4 +92,15 @@ trait Setters
 
         return $this;
     }
+
+    /**
+     * @param $date
+     * @return $this
+     */
+    public function byDate($date)
+    {
+        $this->date = $date;
+
+        return $this;
+    }
 }

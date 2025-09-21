@@ -48,6 +48,11 @@ trait Record
 
             $this->connection->increment($periodKey, $inc, $this->keys->id);
             $this->connection->increment($periodKey . '_total', $inc);
+
+            if ($period === 'day' && config('visits.archive_daily_visits')) {
+                $this->connection->increment($periodKey . '_daily_' . now()->toDateString(), $inc, $this->keys->id);
+                $this->connection->increment($periodKey . '_daily_' . now()->toDateString() . '_total', $inc);
+            }
         }
     }
 

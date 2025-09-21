@@ -89,9 +89,11 @@ class VisitsServiceProvider extends ServiceProvider
         }
 
         $this->app->bind('command.visits:clean', CleanCommand::class);
+        $this->app->bind('command.visits:archive', \Awssat\Visits\Commands\VisitsArchiveCommand::class);
 
         $this->commands([
             'command.visits:clean',
+            'command.visits:archive',
         ]);
     }
 }
