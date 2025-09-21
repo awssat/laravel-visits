@@ -39,7 +39,6 @@ abstract class TestCase extends BaseTestCase
         $this->referer = $this->app['referer'];
 
         $this->runTestMigrations();
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
     }
 
 
@@ -112,6 +111,9 @@ abstract class TestCase extends BaseTestCase
                 $table->timestamps();
             });
         }
+
+        include_once __DIR__ . '/../database/migrations/2023_01_01_000000_create_visits_archive_table.php';
+        (new \CreateVisitsArchiveTable())->up();
     }
 }
 
