@@ -39,6 +39,7 @@ abstract class TestCase extends BaseTestCase
         $this->referer = $this->app['referer'];
 
         $this->runTestMigrations();
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
     }
 
 

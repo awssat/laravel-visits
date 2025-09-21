@@ -32,7 +32,6 @@ class VisitsArchiveCommandTest extends TestCase
             $this->redis->del($keys);
         }
 
-        $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
     }
 
     /** @test */
