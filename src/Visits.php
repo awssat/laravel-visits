@@ -195,7 +195,13 @@ class Visits
      */
     public function ipTimeLeft()
     {
-        return $this->connection->timeLeft($this->keys->ip(request()->ip()));
+        $key = $this->keys->ip(request()->ip());
+
+        if ($this->connection instanceof \Awssat\Visits\DataEngines\RedisEngine) {
+            return $this->connection->timeLeft($key);
+        }
+
+        return 0;
     }
 
     protected function isCrawler()

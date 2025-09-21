@@ -383,12 +383,20 @@ abstract class VisitsTestCase extends TestCase
     {
         $post = Post::create()->fresh();
 
-        visits($post)->seconds(1)->increment();
+        config()->set('visits.remember_ip', 1);
 
-        Carbon::setTestNow(Carbon::now()->addSeconds(visits($post)->ipTimeLeft() + 1));
-        sleep(1);//for redis
+        $post = Post::create()->fresh();
 
+        visits($post)->increment();
 
+        // Second visit should be ignored
+        visits($post)->increment();
+        $this->assertEquals(1, visits($post)->count());
+
+        // Move time forward to invalidate the IP record
+        Carbon::setTestNow(Carbon::now()->addSeconds(2));
+
+        // Third visit should be recorded
         visits($post)->increment();
 
         $this->assertEquals(2, visits($post)->count());
