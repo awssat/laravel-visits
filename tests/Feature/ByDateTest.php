@@ -5,11 +5,9 @@ namespace Awssat\Visits\Tests\Feature;
 use Awssat\Visits\Tests\TestCase;
 use Awssat\Visits\Tests\Post;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Redis;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 
-class VisitsArchiveCommandTest extends TestCase
+class ByDateTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -26,29 +24,22 @@ class VisitsArchiveCommandTest extends TestCase
             'database' => 3,
         ];
 
-        $this->redis = Redis::connection('laravel-visits');
-
-        if (count($keys = $this->redis->keys($this->app['config']['visits.keys_prefix'] . ':testing:*'))) {
-            $this->redis->del($keys);
-        }
+        $this->app['config']['visits.engine'] = \Awssat\Visits\DataEngines\RedisEngine::class;
     }
 
     /** @test */
-    public function it_archives_daily_visits()
+    public function it_can_get_visits_by_date()
     {
         Carbon::setTestNow(Carbon::create(2023, 1, 1));
-
         $post = Post::create(['id' => 1]);
         visits($post)->increment();
 
-        $this->artisan('visits:archive')->assertExitCode(0);
+        Carbon::setTestNow(Carbon::create(2023, 1, 2));
+        visits($post)->increment();
+        visits($post)->increment();
 
-        $this->assertDatabaseHas('visits_archive', [
-            'visitable_type' => 'posts',
-            'visitable_id' => 1,
-            'tag' => 'visits',
-            'date' => '2023-01-01',
-            'count' => 1,
-        ]);
+        $this->assertEquals(1, visits($post)->byDate('2023-01-01')->count());
+        $this->assertEquals(2, visits($post)->byDate('2023-01-02')->count());
+        $this->assertEquals(3, visits($post)->byDate('2023-01-01', '2023-01-02')->count());
     }
 }

@@ -7,6 +7,7 @@ use Awssat\Visits\Traits\{Lists, Periods, Record, Setters};
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 use Jaybizzle\CrawlerDetect\CrawlerDetect;
 
 class Visits
@@ -46,7 +47,7 @@ class Visits
      */
     protected $date = null;
     /**
-     * @var mixed
+     * @var null|string
      */
     protected $periods;
     /**
@@ -166,13 +167,25 @@ class Visits
             return $this->connection->get($this->keys->visits."_languages:{$this->keys->id}", $this->language);
         }
 
+
         if ($this->date) {
-            $key = $this->keys->period('day') . '_daily_' . $this->date;
-            if ($this->keys->instanceOfModel) {
-                return intval($this->connection->get($key, $this->keys->id));
+            $keys = [];
+            $from = \Carbon\Carbon::parse($this->date[0]);
+            $to = $this->date[1] ? \Carbon\Carbon::parse($this->date[1]) : $from;
+
+            for ($date = $from; $date->lte($to); $date->addDay()) {
+                $keys[] = $this->keys->period('day') . '_daily_' . $date->toDateString();
             }
 
-            return intval($this->connection->get($key . '_total'));
+            $total = 0;
+            foreach ($keys as $key) {
+                if ($this->keys->instanceOfModel) {
+                    $total += intval($this->connection->get($key, $this->keys->id));
+                } else {
+                    $total += intval($this->connection->get($key . '_total'));
+                }
+            }
+            return $total;
         }
 
         return intval(
@@ -195,13 +208,7 @@ class Visits
      */
     public function ipTimeLeft()
     {
-        $key = $this->keys->ip(request()->ip());
-
-        if ($this->connection instanceof \Awssat\Visits\DataEngines\RedisEngine) {
-            return $this->connection->timeLeft($key);
-        }
-
-        return 0;
+        return $this->connection->timeLeft($this->keys->ip(request()->ip()));
     }
 
     protected function isCrawler()

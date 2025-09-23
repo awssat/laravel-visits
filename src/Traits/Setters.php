@@ -94,12 +94,13 @@ trait Setters
     }
 
     /**
-     * @param $date
+     * @param $from
+     * @param null $to
      * @return $this
      */
-    public function byDate($date)
+    public function byDate($from, $to = null)
     {
-        $this->date = $date;
+        $this->date = [$from, $to];
 
         return $this;
     }

@@ -35,16 +35,17 @@ class VisitsArchiveCommand extends Command
 
             $keyWithoutPrefix = substr($key, strlen($prefix) + 1);
 
+            $keyParts = explode(':', $key);
+            $key_parts_without_prefix = explode(':', $keyWithoutPrefix);
+            $keyParts = explode(':', $key);
+            $visitable_type = $keyParts[1];
+            $keyWithoutPrefix = implode(':', array_slice($keyParts, 1));
+
             $parts = explode('_', $keyWithoutPrefix);
             $date = array_pop($parts);
             array_pop($parts); // remove daily
             array_pop($parts); // remove day
-            $tag = array_pop($parts); // remove visits
-            $visitable_type = implode('_', $parts);
-
-            if (app()->environment('testing')) {
-                $visitable_type = str_replace('testing:', '', $visitable_type);
-            }
+            $tag = array_pop($parts);
 
             $visits = $redis->valueList($keyWithoutPrefix, -1, true, true);
 
@@ -60,8 +61,8 @@ class VisitsArchiveCommand extends Command
                 ]);
             }
 
-            $redis->delete($keyWithoutPrefix);
-            $redis->delete($keyWithoutPrefix . '_total');
+            $redis->delete($key);
+            $redis->delete($key . '_total');
         }
 
         $this->info('Done.');

@@ -45,17 +45,9 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) and [CODE_OF_CONDUCT](CODE_OF_CONDUCT
 -   [Bader][link-author]
 -   [All Contributors][link-contributors]
 
-## Artisan Commands
+## Todo
 
-### `visits:archive`
-
-This command will archive the daily visits from Redis to the `visits_archive` table. You should run this command daily to prevent data loss.
-
-To enable this feature, you need to set the `archive_daily_visits` option to `true` in your `config/visits.php` file.
-
-```bash
-php artisan visits:archive
-```
+-   An export command to save visits of any periods to a table on the database.
 
 ## Contributors
 

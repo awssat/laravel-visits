@@ -20,6 +20,16 @@ class VisitsServiceProvider extends ServiceProvider
             __DIR__.'/config/visits.php' => config_path('visits.php'),
         ], 'config');
 
+        if ($this->app->runningInConsole()) {
+            if (floatval(app()->version()) < 11.0) {
+                $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+            } else {
+                $this->publishesMigrations([
+                    __DIR__.'/../database/migrations' => database_path('migrations'),
+                ]);
+            }
+        }
+
         if (! class_exists('CreateVisitsTable')) {
             $this->publishes([
                 __DIR__.'/../database/migrations/create_visits_table.php.stub' => database_path('migrations/'.date('Y_m_d_His', time()).'_create_visits_table.php'),
