@@ -3,6 +3,7 @@
 namespace Awssat\Visits;
 
 use Awssat\Visits\Models\Visit;
+use Awssat\Visits\Relations\VisitsHasOne;
 use Awssat\Visits\Traits\{Lists, Periods, Record, Setters};
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
@@ -271,6 +272,12 @@ class Visits
     {
         $prefix = $this->config['keys_prefix'] ?? $this->config['redis_keys_prefix'] ?? 'visits';
         
-        return $this->subject->hasOne(Visit::class, 'secondary_key')->where('primary_key', $prefix.':'.$this->keys->visits);
+        $instance = new Visit;
+        $foreignKey = 'secondary_key';
+        $localKey = $this->subject->getKeyName();
+
+        $relation = new VisitsHasOne($instance->newQuery(), $this->subject, $instance->getTable().'.'.$foreignKey, $localKey);
+
+        return $relation->where('primary_key', $prefix.':'.$this->keys->visits);
     }
 }
