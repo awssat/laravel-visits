@@ -22,6 +22,9 @@ abstract class TestCase extends BaseTestCase
     protected $redis;
     protected $connection;
 
+    /** @var \Illuminate\Testing\TestResponse|null */
+    protected static $latestResponse = null;
+
     /**
      * Setup the test environment.
      *
