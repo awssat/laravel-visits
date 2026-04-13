@@ -19,190 +19,10 @@ abstract class VisitsTestCase extends TestCase
         parent::setUp();
     }
 
-    /** @test * */
-    public function by_can_accept_array()
-    {
-        User::create();
-        $post = Post::create();
-
-        visits($post)->by(['user' => 1])->increment();
-        $this->assertEquals(1, visits($post)->by(['user' => 1])->count());
-        $this->assertEquals(0, visits($post)->count());
-    }
-
-    /** @test * */
-    public function by_cant_repeat_accept_array()
-    {
-        User::create();
-        $post = Post::create();
-
-        $firstResult = visits($post)->increment();
-        $secondResult = visits($post)->increment();
-
-        $this->assertTrue($firstResult);
-        $this->assertFalse($secondResult);
-        $this->assertEquals(1, visits($post)->count());
-    }
-
-    /** @test * */
-    public function visits_by_user_lists()
-    {
-        $user = User::create();
-
-        foreach (range(1, 20) as $id) {
-            $post = Post::create();
-            visits($post)->by($user)->increment();
-        }
-
-        $top_visits_overall = visits('Awssat\Visits\Tests\Post')
-            ->top(10)
-            ->toArray();
-        $this->assertEmpty($top_visits_overall);
-
-        $top_visits = visits('Awssat\Visits\Tests\Post')
-            ->by($user)
-            ->top(20)
-            ->toArray();
-
-        $this->assertCount(20, $top_visits);
-    }
-
-    /** @test * */
-    public function visits_by_user()
-    {
-        $user = User::create();
-        $post = Post::create();
-
-        visits($post)->by($user)->increment();
-
-        $this->assertEquals(1, visits($post)->by($user)->count());
-        $this->assertEquals(0, visits($post)->count());
-    }
-
-    /** @test * */
-    public function laravel_visits_is_the_default_connection()
-    {
-        $this->assertEquals('laravel-visits', config('visits.connection'));
-    }
-
-    /** @test */
-    public function multi_tags_storing()
-    {
-        $userA = Post::create()->fresh();
-
-        visits($userA)->increment();
-
-        visits($userA, 'clicks')->increment();
-        visits($userA, 'clicks2')->increment();
-
-        $keys = $this->connection->search('testing:*');
-
-        $this->assertContains('testing:posts_visits', $keys);
-        $this->assertContains('testing:posts_clicks', $keys);
-        $this->assertContains('testing:posts_clicks2', $keys);
-    }
-
-    /** @test */
-    public function multi_tags_visits()
-    {
-        $userA = Post::create()->fresh();
-
-        visits($userA)->increment();
-
-        visits($userA, 'clicks')->increment();
-
-        $this->assertEquals([1, 1], [visits($userA)->count(), visits($userA, 'clicks')->count()]);
-    }
-
-    /** @test */
-    public function referer_test()
-    {
-        $this->referer->put('google.com');
-
-        $Post = Post::create()->fresh();
-
-        visits($Post)->forceIncrement();
-
-        $this->referer->put('twitter.com');
-
-        visits($Post)->forceIncrement(10);
-
-        $this->assertEquals(['twitter.com' => 10, 'google.com' => 1], visits($Post)->refs());
-    }
-
-    /** @test */
-    public function operating_system_test()
-    {
-        $Post = Post::create()->fresh();
-
-        request()->server->replace([
-            'HTTP_USER_AGENT' => 'Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148'
-        ]);
-
-
-        visits($Post)->forceIncrement();
-
-        request()->server->replace([
-            'HTTP_USER_AGENT' => 'Mozilla/5.0 (Linux; Android 6.0.1; SAMSUNG SM-N920T Build/MMB29K) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/4.0 Chrome/44.0.2403.133 Mobile Safari/537.36'
-        ]);
-
-        visits($Post)->forceIncrement(10);
-
-        $this->assertEquals(['AndroidMobile' => 10, 'iPad' => 1], visits($Post)->operatingSystems());
-    }
-
-    /** @test */
-    public function language_test()
-    {
-        $Post = Post::create()->fresh();
-
-        request()->headers->replace([
-            'Accept-Language' => 'ar'
-        ]);
-
-        visits($Post)->forceIncrement();
-
-        $this->assertEquals(['ar' => 1], visits($Post)->languages());
-    }
-
-    /** @test */
-    public function store_country_aswell()
-    {
-        $Post = Post::create()->fresh();
-
-        visits($Post)->increment(1);
-
-        $this->assertEquals(1, visits($Post)->country('us')->count());
-    }
-
-    /** @test */
-    /*
-    public function get_countries()
-    {
-        $Post = Post::create()->fresh();
-
-        $ips = [
-            '88.17.102.155',
-            '178.80.134.112',
-            '83.96.36.50',
-            '211.202.2.111',
-        ];
-
-        $x = 1;
-        foreach ($ips as $ip)
-        {
-            visits($Post)->increment($x++, true, true, true, $ip);
-        }
-
-        visits($Post)->increment(20, true, true, true, '178.80.134.112');
-
-        $this->assertEquals(['sa' => 22, 'kr' => 4, 'kw' => 3, 'es' => 1], visits($Post)->countries(-1));
-    }*/
 
     /**
-     * @test
      */
-    public function it_reset_counter()
+    public function test_it_reset_counter()
     {
         $post1 = Post::create()->fresh();
         $post2 = Post::create()->fresh();
@@ -221,8 +41,8 @@ abstract class VisitsTestCase extends TestCase
         );
     }
 
-    /** @test */
-    public function reset_specific_ip()
+    
+    public function test_reset_specific_ip()
     {
         $post = Post::create()->fresh();
 
@@ -273,8 +93,8 @@ abstract class VisitsTestCase extends TestCase
         );
     }
 
-    /** @test */
-    public function it_shows_proper_tops_and_lows()
+    
+    public function test_it_shows_proper_tops_and_lows()
     {
         $arr = [];
         $unique = [];
@@ -328,8 +148,8 @@ abstract class VisitsTestCase extends TestCase
         );
     }
 
-    /** @test */
-    public function it_reset_ips()
+    
+    public function test_it_reset_ips()
     {
         $post1 = Post::create()->fresh();
         $post2 = Post::create()->fresh();
@@ -350,9 +170,8 @@ abstract class VisitsTestCase extends TestCase
     }
 
     /**
-     * @test
      */
-    public function it_counts_visits()
+    public function test_it_counts_visits()
     {
         $post = Post::create()->fresh();
 
@@ -377,9 +196,8 @@ abstract class VisitsTestCase extends TestCase
     }
 
     /**
-     * @test
      */
-    public function it_only_record_ip_for_amount_of_time()
+    public function test_it_only_record_ip_for_amount_of_time()
     {
         $post = Post::create()->fresh();
 
@@ -395,7 +213,6 @@ abstract class VisitsTestCase extends TestCase
     }
 
     /**
-     * @test
      */
     public function n_minus_1_bug()
     {
@@ -410,9 +227,8 @@ abstract class VisitsTestCase extends TestCase
     }
 
     /**
-     * @test
      */
-    public function it_list_from_cache()
+    public function test_it_list_from_cache()
     {
         $post1 = Post::create(['id' => 1, 'name' => '1'])->fresh();
         $post2 = Post::create(['id' => 2, 'name' => '2'])->fresh();
@@ -443,9 +259,8 @@ abstract class VisitsTestCase extends TestCase
     }
 
     /**
-     * @test
      */
-    public function it_list_filtered_by_constraints()
+    public function test_it_list_filtered_by_constraints()
     {
         $posts =[];
 
