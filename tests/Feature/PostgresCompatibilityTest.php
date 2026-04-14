@@ -31,8 +31,7 @@ class PostgresCompatibilityTest extends TestCase
         (new \CreateVisitsTable())->up();
     }
 
-    /** @test */
-    public function it_generates_correct_query_types_for_postgres()
+    public function test_it_generates_correct_query_types_for_postgres()
     {
         $post1 = TestPost::create(['name' => 'p1']);
         $post2 = TestPost::create(['name' => 'p2']);

@@ -17,8 +17,7 @@ class PeriodsTestCase extends TestCase
         parent::setUp();
     }
 
-    /** @test * */
-    public function x_hours_periods()
+    public function test_x_hours_periods()
     {
         config()->set('visits.periods', ['3hours']);
 
@@ -44,8 +43,7 @@ class PeriodsTestCase extends TestCase
         ]);
     }
 
-    /** @test */
-    public function day_test()
+    public function test_day_test()
     {
         Carbon::setTestNow(
             $time = Carbon::now()->endOfDay()
@@ -98,8 +96,7 @@ class PeriodsTestCase extends TestCase
         $this->assertEquals(1, intval(abs(now()->addSeconds(visits('Awssat\Visits\Tests\Post')->period('day')->timeLeft())->diffInDays($time))));
     }
 
-    /** @test */
-    public function all_periods()
+    public function test_all_periods()
     {
         //somone add something on end of the week
         Carbon::setTestNow(Carbon::now()->startOfMonth()->endOfWeek());
@@ -144,8 +141,7 @@ class PeriodsTestCase extends TestCase
         ]);
     }
 
-    /** @test */
-    public function total_periods()
+    public function test_total_periods()
     {
         //somone add something on end of the week
         Carbon::setTestNow(Carbon::now()->startOfMonth()->endOfWeek());
