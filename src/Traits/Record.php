@@ -75,7 +75,7 @@ trait Record
      */
     public function getVisitorOperatingSystem()
     {
-        $osArray = [
+        static $osArray = [
             '/windows|win32|win16|win95/i' => 'Windows',
             '/iphone/i' => 'iPhone',
             '/ipad/i' => 'iPad',
@@ -87,13 +87,24 @@ trait Record
             '/linux/i' => 'Linux',
         ];
 
+        static $lastUA = null;
+        static $lastOS = null;
+
+        $userAgent = request()->server('HTTP_USER_AGENT') ?? '';
+
+        if ($userAgent === $lastUA && $lastUA !== null) {
+            return $lastOS;
+        }
+
+        $lastUA = $userAgent;
+
         foreach ($osArray as $regex => $value) {
-            if (preg_match($regex, request()->server('HTTP_USER_AGENT') ?? '')) {
-                return $value;
+            if (preg_match($regex, $userAgent)) {
+                return $lastOS = $value;
             }
         }
 
-        return 'unknown';
+        return $lastOS = 'unknown';
     }
 
     /**
