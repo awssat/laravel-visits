@@ -48,17 +48,15 @@ class VisitsHasOne extends HasOne
             return $this->getRelationExistenceQueryForSelfRelation($query, $parentQuery, $columns);
         }
 
-        $grammar = $query->getQuery()->getGrammar();
-
         if ($query->getConnection()->getDriverName() === 'pgsql') {
+            $grammar = $query->getQuery()->getGrammar();
+
             return $query->select($columns)->whereRaw(
                 "{$grammar->wrap($this->getExistenceCompareKey())} = CAST({$grammar->wrap($this->getQualifiedParentKeyName())} AS VARCHAR)"
             );
         }
 
-        return $query->select($columns)->whereColumn(
-            $this->getExistenceCompareKey(), '=', $this->getQualifiedParentKeyName()
-        );
+        return parent::getRelationExistenceQuery($query, $parentQuery, $columns);
     }
 
     /**
