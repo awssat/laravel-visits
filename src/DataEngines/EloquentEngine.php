@@ -49,14 +49,22 @@ class EloquentEngine implements DataEngine
 
     public function delete($key, $member = null): bool
     {
-        if(is_array($key)) {
-            array_walk($key, function($item) {
-                $this->delete($item);
+        if (is_array($key) && (empty($member) && !is_numeric($member))) {
+            $keys = array_map(function ($item) {
+                return $this->prefix . $item;
+            }, $key);
+
+            return $this->model->whereIn('primary_key', $keys)->delete() > 0;
+        }
+
+        if (is_array($key)) {
+            array_walk($key, function ($item) use ($member) {
+                $this->delete($item, $member);
             });
             return true;
         }
 
-        if(! empty($member) || is_numeric($member)) {
+        if (!empty($member) || is_numeric($member)) {
             return $this->model->where(['primary_key' => $this->prefix.$key, 'secondary_key' => $member])->delete();
         } else {
             return $this->model->where(['primary_key' => $this->prefix.$key])->delete();
