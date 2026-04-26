@@ -355,8 +355,8 @@ abstract class VisitsTestCase extends TestCase
 
         visits($post)->seconds(1)->increment();
 
-        Carbon::setTestNow(Carbon::now()->addSeconds(visits($post)->ipTimeLeft() + 1));
-        sleep(1);//for redis
+        Carbon::setTestNow(Carbon::now()->addSeconds(2));
+        sleep(2);//for redis
 
 
         visits($post)->increment();
