@@ -98,10 +98,16 @@ class Reset extends Visits
      */
     public function periods()
     {
+        $keys = [];
+
         foreach ($this->periods as $period => $_) {
             $periodKey = $this->keys->period($period);
-            $this->connection->delete($periodKey);
-            $this->connection->delete($periodKey.'_total');
+            $keys[] = $periodKey;
+            $keys[] = $periodKey . '_total';
+        }
+
+        if (count($keys)) {
+            $this->connection->delete($keys);
         }
     }
 

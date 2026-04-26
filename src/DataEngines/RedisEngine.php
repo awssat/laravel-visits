@@ -59,20 +59,19 @@ class RedisEngine implements DataEngine
 
     public function delete($key, $member = null): bool
     {
-        if (is_array($key)) {
+        if (is_array($key) && (empty($member) && !is_numeric($member))) {
             if (empty($key)) {
                 return true;
             }
 
-            if (empty($member) && !is_numeric($member)) {
-                $keys = array_map(function ($item) {
-                    return $this->prefix . $item;
-                }, $key);
+            $keys = array_map(function ($item) {
+                return $this->prefix . $item;
+            }, $key);
 
-                $this->connection->del(...$keys);
-                return true;
-            }
+            return $this->connection->del($keys) > 0;
+        }
 
+        if (is_array($key)) {
             array_walk($key, function ($item) use ($member) {
                 $this->delete($item, $member);
             });
