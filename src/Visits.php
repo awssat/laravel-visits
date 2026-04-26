@@ -68,6 +68,16 @@ class Visits
     /**
      * @var array
      */
+    public $excludeIps = [];
+
+    /**
+     * @var array
+     */
+    public $excludeBots = [];
+
+    /**
+     * @var array
+     */
     public $config = [];
 
     /**
@@ -91,6 +101,8 @@ class Visits
         $this->fresh = $this->config['always_fresh'];
         $this->ignoreCrawlers = $this->config['ignore_crawlers'];
         $this->globalIgnore = $this->config['global_ignore'];
+        $this->excludeIps = $this->config['exclude_ips'] ?? [];
+        $this->excludeBots = $this->config['exclude_bots'] ?? [];
         $this->subject = $subject;
         $this->keys = new Keys($subject, preg_replace('/[^a-z0-9_]/i', '', $tag));
 
@@ -191,6 +203,24 @@ class Visits
         return $this->ignoreCrawlers && app(CrawlerDetect::class)->isCrawler();
     }
 
+    protected function isIgnored()
+    {
+        $ip = request()->ip();
+        $userAgent = request()->server('HTTP_USER_AGENT') ?? '';
+
+        if (in_array($ip, $this->excludeIps)) {
+            return true;
+        }
+
+        foreach ($this->excludeBots as $bot) {
+            if (stripos($userAgent, $bot) !== false) {
+                return true;
+            }
+        }
+
+        return $this->isCrawler();
+    }
+
     /**
      * @param int $inc value to increment
      * @param bool $force force increment, skip time limit
@@ -199,7 +229,7 @@ class Visits
      */
     public function increment($inc = 1, $force = false, $ignore = [])
     {
-        if ($force || (!$this->isCrawler() && !$this->recordedIp())) {
+        if ($force || (!$this->isIgnored() && !$this->recordedIp())) {
    
             $this->connection->increment($this->keys->visits, $inc, $this->keys->id);
             $this->connection->increment($this->keys->visitsTotal(), $inc);
