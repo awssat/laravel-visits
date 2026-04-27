@@ -426,4 +426,48 @@ abstract class VisitsTestCase extends TestCase
  
         $this->assertNotEquals(visits('Awssat\Visits\Tests\Post')->top(5, ['name' => 'naji']), [$posts['naji']]);
     }
+
+    public function test_exclude_ips()
+    {
+        config(['visits.exclude_ips' => ['127.0.0.1']]);
+
+        $post = Post::create()->fresh();
+
+        request()->server->replace([
+            'REMOTE_ADDR' => '127.0.0.1'
+        ]);
+
+        visits($post)->increment();
+
+        $this->assertEquals(0, visits($post)->count());
+
+        config(['visits.exclude_ips' => ['192.168.1.1']]);
+
+        visits($post)->increment();
+
+        $this->assertEquals(1, visits($post)->count());
+    }
+
+    public function test_exclude_bots()
+    {
+        config(['visits.exclude_bots' => ['Googlebot', 'Bingbot']]);
+
+        $post = Post::create()->fresh();
+
+        request()->server->replace([
+            'HTTP_USER_AGENT' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+        ]);
+
+        visits($post)->increment();
+
+        $this->assertEquals(0, visits($post)->count());
+
+        request()->server->replace([
+            'HTTP_USER_AGENT' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+        ]);
+
+        visits($post)->increment();
+
+        $this->assertEquals(1, visits($post)->count());
+    }
 }
